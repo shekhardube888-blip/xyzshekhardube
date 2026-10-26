@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Menu, Rocket, UserRound, ShieldCheck, LogOut } from "lucide-react"
 import { NAV_LINKS } from "./portal-data"
@@ -34,7 +35,13 @@ export function Navbar() {
   }, [])
 
   const handleLogout = () => {
+    const wasGoogle = role === "google"
     logout()
+    if (wasGoogle) {
+      signOut({ redirect: false }).catch(() => {
+        /* ignore — signOut can fail when there's no NextAuth session */
+      })
+    }
     toast({
       title: "Logged out",
       description: "Session cleared. You can browse as guest or sign back in any time.",

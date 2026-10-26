@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 "use client"
 
 import { useEffect, useState } from "react"
@@ -13,9 +12,9 @@ import { AdminDashboard } from "./admin-dashboard"
 export function AdminGate() {
   const role = useAuth((s) => s.role)
   const [mounted, setMounted] = useState(false)
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time mount guard for SSR-safe localStorage read
   useEffect(() => setMounted(true), [])
 
   if (!mounted || role !== "admin") return null
   return <AdminDashboard />
 }
+

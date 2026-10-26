@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -29,6 +30,7 @@ import {
   ADMIN_DEMO_EMAIL,
   ADMIN_DEMO_PASSWORD,
 } from "./auth-store"
+import { GoogleSignInButton } from "./google-account-picker"
 
 const TRUST_BADGES = [
   { label: "AICTE-Aligned", icon: BadgeCheck },
@@ -122,7 +124,14 @@ export function Login() {
   }
 
   const handleLogout = () => {
+    const wasGoogle = role === "google"
     logout()
+    if (wasGoogle) {
+      // Also clear the NextAuth session if there is one
+      signOut({ redirect: false }).catch(() => {
+        /* ignore — signOut can fail when there's no NextAuth session, that's fine */
+      })
+    }
     toast({
       title: "Logged out",
       description: "Session cleared. You can browse as guest or sign back in any time.",
@@ -202,19 +211,7 @@ export function Login() {
                 </TabsList>
 
                 <TabsContent value="signin" className="mt-6 space-y-4">
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    type="button"
-                    onClick={() =>
-                      toast({
-                        title: "Google Sign-In",
-                        description: "OAuth wiring is on the v2 roadmap — use Guest or Sign Up for now.",
-                      })
-                    }
-                  >
-                    Sign in with Google
-                  </Button>
+                  <GoogleSignInButton />
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                       <span className="w-full border-t" />

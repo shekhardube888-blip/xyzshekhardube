@@ -3,18 +3,20 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 
-export type Role = "guest" | "admin" | null
+export type Role = "guest" | "admin" | "google" | null
 
 export type Session = {
   role: Role
   name: string
   email: string
+  picture?: string | null
   loggedInAt: number | null
 }
 
 type AuthState = Session & {
   loginAsGuest: () => void
   loginAsAdmin: (email: string, password: string) => { ok: true } | { ok: false; error: string }
+  loginAsGoogle: (name: string, email: string, picture?: string | null) => void
   logout: () => void
 }
 
@@ -32,6 +34,7 @@ export const useAuth = create<AuthState>()(
       role: null,
       name: "",
       email: "",
+      picture: null,
       loggedInAt: null,
 
       loginAsGuest: () =>
@@ -39,6 +42,7 @@ export const useAuth = create<AuthState>()(
           role: "guest",
           name: GUEST_NAME,
           email: GUEST_EMAIL,
+          picture: null,
           loggedInAt: Date.now(),
         }),
 
@@ -54,13 +58,23 @@ export const useAuth = create<AuthState>()(
           role: "admin",
           name: ADMIN_NAME,
           email: cleanEmail,
+          picture: null,
           loggedInAt: Date.now(),
         })
         return { ok: true }
       },
 
+      loginAsGoogle: (name, email, picture = null) =>
+        set({
+          role: "google",
+          name: name || "Google User",
+          email: email || "user@gmail.com",
+          picture,
+          loggedInAt: Date.now(),
+        }),
+
       logout: () =>
-        set({ role: null, name: "", email: "", loggedInAt: null }),
+        set({ role: null, name: "", email: "", picture: null, loggedInAt: null }),
     }),
     {
       name: "agileportal-auth",
@@ -69,8 +83,10 @@ export const useAuth = create<AuthState>()(
         role: s.role,
         name: s.name,
         email: s.email,
+        picture: s.picture,
         loggedInAt: s.loggedInAt,
       }),
     },
   ),
 )
+
