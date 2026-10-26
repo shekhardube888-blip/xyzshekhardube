@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Menu, X, Rocket } from "lucide-react"
+import { Menu, Rocket, UserRound, ShieldCheck, LogOut } from "lucide-react"
 import { NAV_LINKS } from "./portal-data"
 import {
   Sheet,
@@ -12,10 +12,19 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
+import { useAuth } from "./auth-store"
+import { useToast } from "@/hooks/use-toast"
+import { Badge } from "@/components/ui/badge"
 
 export function Navbar() {
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const { role, name, logout } = useAuth()
+  const { toast } = useToast()
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time mount guard for SSR-safe localStorage read
+  useEffect(() => setMounted(true), [])
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16)
@@ -23,6 +32,14 @@ export function Navbar() {
     window.addEventListener("scroll", onScroll, { passive: true })
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
+
+  const handleLogout = () => {
+    logout()
+    toast({
+      title: "Logged out",
+      description: "Session cleared. You can browse as guest or sign back in any time.",
+    })
+  }
 
   return (
     <header
@@ -52,15 +69,54 @@ export function Navbar() {
               {l.label}
             </a>
           ))}
+          {mounted && role === "admin" && (
+            <a
+              href="#admin"
+              className="rounded-md px-3 py-2 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50"
+            >
+              Admin Dashboard
+            </a>
+          )}
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
-          <Button variant="ghost" size="sm" asChild>
-            <a href="#login">Login</a>
-          </Button>
-          <Button size="sm" asChild className="bg-emerald-600 hover:bg-emerald-700">
-            <a href="#login">Register Free</a>
-          </Button>
+          {mounted && role ? (
+            <>
+              <Badge
+                variant="outline"
+                className={`gap-1 ${
+                  role === "admin"
+                    ? "border-amber-300 bg-amber-50 text-amber-700"
+                    : "border-emerald-300 bg-emerald-50 text-emerald-700"
+                }`}
+              >
+                {role === "admin" ? (
+                  <ShieldCheck className="h-3 w-3" />
+                ) : (
+                  <UserRound className="h-3 w-3" />
+                )}
+                {name}
+              </Badge>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <LogOut className="mr-1.5 h-4 w-4" />
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" size="sm" asChild>
+                <a href="#login">Login</a>
+              </Button>
+              <Button size="sm" asChild className="bg-emerald-600 hover:bg-emerald-700">
+                <a href="#login">Register Free</a>
+              </Button>
+            </>
+          )}
         </div>
 
         <Sheet open={open} onOpenChange={setOpen}>
@@ -94,18 +150,51 @@ export function Navbar() {
                   </a>
                 </SheetClose>
               ))}
+              {mounted && role === "admin" && (
+                <SheetClose asChild>
+                  <a
+                    href="#admin"
+                    className="rounded-md px-3 py-2.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50"
+                  >
+                    Admin Dashboard
+                  </a>
+                </SheetClose>
+              )}
             </div>
             <div className="mt-auto flex flex-col gap-2 px-4 pb-6">
-              <SheetClose asChild>
-                <Button variant="outline" asChild>
-                  <a href="#login">Login</a>
-                </Button>
-              </SheetClose>
-              <SheetClose asChild>
-                <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
-                  <a href="#login">Register Free</a>
-                </Button>
-              </SheetClose>
+              {mounted && role ? (
+                <>
+                  <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-center">
+                    <p className="text-xs text-muted-foreground">Signed in as</p>
+                    <p className="text-sm font-semibold text-foreground">{name}</p>
+                    <p className="mt-0.5 text-[10px] font-mono uppercase text-emerald-700">
+                      {role}
+                    </p>
+                  </div>
+                  <SheetClose asChild>
+                    <Button
+                      variant="outline"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="mr-1.5 h-4 w-4" />
+                      Logout
+                    </Button>
+                  </SheetClose>
+                </>
+              ) : (
+                <>
+                  <SheetClose asChild>
+                    <Button variant="outline" asChild>
+                      <a href="#login">Login</a>
+                    </Button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
+                      <a href="#login">Register Free</a>
+                    </Button>
+                  </SheetClose>
+                </>
+              )}
             </div>
           </SheetContent>
         </Sheet>

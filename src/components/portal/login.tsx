@@ -13,8 +13,22 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { BadgeCheck, ShieldCheck, Clock, Globe } from "lucide-react"
+import {
+  BadgeCheck,
+  ShieldCheck,
+  Clock,
+  Globe,
+  UserRound,
+  Info,
+  AlertCircle,
+  LogOut,
+} from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import {
+  useAuth,
+  ADMIN_DEMO_EMAIL,
+  ADMIN_DEMO_PASSWORD,
+} from "./auth-store"
 
 const TRUST_BADGES = [
   { label: "AICTE-Aligned", icon: BadgeCheck },
@@ -25,18 +39,93 @@ const TRUST_BADGES = [
 
 export function Login() {
   const { toast } = useToast()
+  const {
+    role,
+    name,
+    email,
+    loginAsGuest,
+    loginAsAdmin,
+    logout,
+  } = useAuth()
+
+  // Sign In tab
   const [studentEmail, setStudentEmail] = useState("")
   const [studentPassword, setStudentPassword] = useState("")
+
+  // Sign Up tab
   const [signupName, setSignupName] = useState("")
   const [signupEmail, setSignupEmail] = useState("")
   const [signupStream, setSignupStream] = useState("")
+
+  // Admin tab
   const [adminUser, setAdminUser] = useState("")
   const [adminPass, setAdminPass] = useState("")
+  const [adminError, setAdminError] = useState<string | null>(null)
 
-  const fakeSubmit = (msg: string) => {
+  const submitStudentSignIn = () => {
+    if (!studentEmail || !studentPassword) {
+      toast({
+        title: "Missing details",
+        description: "Please enter your email and password to sign in.",
+      })
+      return
+    }
     toast({
-      title: "Submitted",
-      description: msg,
+      title: "Sign-in recorded",
+      description: `${studentEmail} — student dashboard access is on the v2 roadmap.`,
+    })
+  }
+
+  const submitSignup = () => {
+    if (!signupName || !signupEmail || !signupStream) {
+      toast({
+        title: "Please complete the form",
+        description: "Name, email and degree stream are all required.",
+      })
+      return
+    }
+    toast({
+      title: "Sign-up received",
+      description: `Thanks ${signupName.split(" ")[0]} — our team will verify your enrollment within 48 hours.`,
+    })
+    setSignupName("")
+    setSignupEmail("")
+    setSignupStream("")
+  }
+
+  const handleGuestLogin = () => {
+    loginAsGuest()
+    toast({
+      title: "Welcome, Guest!",
+      description: "You can browse all programs, projects and testimonials freely.",
+    })
+  }
+
+  const handleAdminLogin = () => {
+    setAdminError(null)
+    const res = loginAsAdmin(adminUser, adminPass)
+    if (res.ok) {
+      toast({
+        title: "Admin signed in",
+        description: "Welcome back. Admin Dashboard is now visible above this section.",
+      })
+      setAdminUser("")
+      setAdminPass("")
+    } else {
+      setAdminError(res.error)
+      toast({
+        title: "Admin login failed",
+        description: res.error,
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleLogout = () => {
+    logout()
+    toast({
+      title: "Logged out",
+      description: "Session cleared. You can browse as guest or sign back in any time.",
     })
   }
 
@@ -52,8 +141,9 @@ export function Login() {
               Sign in to access your dashboard
             </h2>
             <p className="mt-4 text-base text-muted-foreground sm:text-lg">
-              Students: sign in with Google or email + password. Admin: use your credentials.
-              New here? Use the Sign Up tab to register as a student — onboarding takes under 60
+              Students: sign in with Google, email + password, or continue as a guest to
+              browse. Admin: use the demo credentials shown in the Admin tab. New here?
+              Use the Sign Up tab to register as a student — onboarding takes under 60
               seconds.
             </p>
 
@@ -71,13 +161,36 @@ export function Login() {
                 )
               })}
             </ul>
+
+            {role && (
+              <div className="mt-6 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-foreground">
+                    Signed in as {name}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Role: <span className="font-mono">{role}</span> · {email}
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleLogout}
+                  className="border-emerald-300 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"
+                >
+                  <LogOut className="mr-1.5 h-4 w-4" />
+                  Logout
+                </Button>
+              </div>
+            )}
           </div>
 
           <Card className="shadow-md">
             <CardHeader>
               <CardTitle>AgilePortal Access</CardTitle>
               <CardDescription>
-                Pick a tab to sign in or register. All student tracks are 100% free.
+                Pick a tab to sign in or register. Students are 100% free.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -89,17 +202,25 @@ export function Login() {
                 </TabsList>
 
                 <TabsContent value="signin" className="mt-6 space-y-4">
-                  <div className="flex flex-col gap-2">
-                    <Button variant="outline" className="w-full" type="button">
-                      Sign in with Google
-                    </Button>
-                    <div className="relative">
-                      <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t" />
-                      </div>
-                      <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-background px-2 text-muted-foreground">or</span>
-                      </div>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    type="button"
+                    onClick={() =>
+                      toast({
+                        title: "Google Sign-In",
+                        description: "OAuth wiring is on the v2 roadmap — use Guest or Sign Up for now.",
+                      })
+                    }
+                  >
+                    Sign in with Google
+                  </Button>
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-background px-2 text-muted-foreground">or</span>
                     </div>
                   </div>
                   <div className="space-y-1.5">
@@ -124,14 +245,31 @@ export function Login() {
                   </div>
                   <Button
                     className="w-full bg-emerald-600 hover:bg-emerald-700"
-                    onClick={() =>
-                      fakeSubmit("Sign-in request received — check your inbox to confirm.")
-                    }
+                    onClick={submitStudentSignIn}
                   >
                     Sign In
                   </Button>
+                  <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+                    <p className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
+                      <UserRound className="h-3.5 w-3.5" />
+                      Just exploring?
+                    </p>
+                    <p className="mt-1 text-xs text-emerald-700/80">
+                      Continue as a guest — browse all categories, programs and projects
+                      without registering.
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2 w-full border-emerald-300 bg-background text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"
+                      onClick={handleGuestLogin}
+                    >
+                      <UserRound className="mr-1.5 h-4 w-4" />
+                      Continue as Guest
+                    </Button>
+                  </div>
                   <p className="text-center text-xs text-muted-foreground">
-                    Don&apos;t have an account? Sign up as a student below.
+                    Don&apos;t have an account? Switch to the Sign Up tab.
                   </p>
                 </TabsContent>
 
@@ -166,11 +304,7 @@ export function Login() {
                   </div>
                   <Button
                     className="w-full bg-emerald-600 hover:bg-emerald-700"
-                    onClick={() =>
-                      fakeSubmit(
-                        "Sign-up received — our team will verify your enrollment within 48 hours.",
-                      )
-                    }
+                    onClick={submitSignup}
                   >
                     Register Free
                   </Button>
@@ -186,7 +320,10 @@ export function Login() {
                       id="ad-user"
                       placeholder="admin@agileportal.in"
                       value={adminUser}
-                      onChange={(e) => setAdminUser(e.target.value)}
+                      onChange={(e) => {
+                        setAdminUser(e.target.value)
+                        setAdminError(null)
+                      }}
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -196,24 +333,57 @@ export function Login() {
                       type="password"
                       placeholder="••••••••"
                       value={adminPass}
-                      onChange={(e) => setAdminPass(e.target.value)}
+                      onChange={(e) => {
+                        setAdminPass(e.target.value)
+                        setAdminError(null)
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleAdminLogin()
+                      }}
                     />
                   </div>
+                  {adminError && (
+                    <div className="flex items-start gap-2 rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+                      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                      <span>{adminError}</span>
+                    </div>
+                  )}
                   <Button
                     className="w-full"
-                    onClick={() => fakeSubmit("Admin sign-in attempt logged.")}
+                    onClick={handleAdminLogin}
                   >
                     Sign In
                   </Button>
+
+                  <div className="rounded-lg border bg-muted/40 p-3">
+                    <p className="flex items-center gap-1.5 text-xs font-semibold">
+                      <Info className="h-3.5 w-3.5 text-emerald-600" />
+                      Demo admin credentials
+                    </p>
+                    <dl className="mt-2 space-y-1 text-xs text-muted-foreground">
+                      <div className="flex justify-between gap-2">
+                        <dt>Email</dt>
+                        <dd className="font-mono text-foreground">{ADMIN_DEMO_EMAIL}</dd>
+                      </div>
+                      <div className="flex justify-between gap-2">
+                        <dt>Password</dt>
+                        <dd className="font-mono text-foreground">{ADMIN_DEMO_PASSWORD}</dd>
+                      </div>
+                    </dl>
+                    <p className="mt-2 text-[11px] text-muted-foreground">
+                      On success the Admin Dashboard section appears above this card.
+                    </p>
+                  </div>
+
                   <p className="text-center text-xs text-muted-foreground">
-                    Admin login only. Students use Google Sign-In or the Sign Up tab.
+                    Admin login only. Students use Google Sign-In, Guest mode, or the Sign Up tab.
                   </p>
                 </TabsContent>
               </Tabs>
             </CardContent>
             <CardFooter className="justify-center">
               <p className="text-xs text-muted-foreground">
-                By continuing you agree to AgilePortal&apos;s Terms & Privacy Policy.
+                By continuing you agree to AgilePortal&apos;s Terms &amp; Privacy Policy.
               </p>
             </CardFooter>
           </Card>
