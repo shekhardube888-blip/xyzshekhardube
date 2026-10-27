@@ -25,6 +25,7 @@ import {
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "./auth-store"
+import { WeeklyTasksPanel } from "./weekly-tasks-panel"
 
 // Demo per-student data — would be fetched from /api/student/me in v2.
 const PROGRAM_WEEKS = 8
@@ -444,6 +445,9 @@ export function StudentDashboard() {
             </Card>
           </div>
         </div>
+
+        {/* Weekly tasks + tests + market scenarios + solutions */}
+        <WeeklyTasksPanel />
       </div>
     </section>
   )
