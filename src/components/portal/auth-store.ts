@@ -3,12 +3,13 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 
-export type Role = "guest" | "admin" | "google" | null
+export type Role = "guest" | "admin" | "google" | "student" | null
 
 export type Session = {
   role: Role
   name: string
   email: string
+  stream?: string
   picture?: string | null
   loggedInAt: number | null
 }
@@ -17,6 +18,7 @@ type AuthState = Session & {
   loginAsGuest: () => void
   loginAsAdmin: (email: string, password: string) => { ok: true } | { ok: false; error: string }
   loginAsGoogle: (name: string, email: string, picture?: string | null) => void
+  loginAsStudent: (name: string, email: string, stream?: string) => void
   logout: () => void
 }
 
@@ -34,6 +36,7 @@ export const useAuth = create<AuthState>()(
       role: null,
       name: "",
       email: "",
+      stream: undefined,
       picture: null,
       loggedInAt: null,
 
@@ -42,6 +45,7 @@ export const useAuth = create<AuthState>()(
           role: "guest",
           name: GUEST_NAME,
           email: GUEST_EMAIL,
+          stream: undefined,
           picture: null,
           loggedInAt: Date.now(),
         }),
@@ -58,6 +62,7 @@ export const useAuth = create<AuthState>()(
           role: "admin",
           name: ADMIN_NAME,
           email: cleanEmail,
+          stream: undefined,
           picture: null,
           loggedInAt: Date.now(),
         })
@@ -69,12 +74,30 @@ export const useAuth = create<AuthState>()(
           role: "google",
           name: name || "Google User",
           email: email || "user@gmail.com",
+          stream: undefined,
           picture,
           loggedInAt: Date.now(),
         }),
 
+      loginAsStudent: (name, email, stream) =>
+        set({
+          role: "student",
+          name: name || "Student",
+          email: email || "student@college.edu",
+          stream: stream || "Unspecified",
+          picture: null,
+          loggedInAt: Date.now(),
+        }),
+
       logout: () =>
-        set({ role: null, name: "", email: "", picture: null, loggedInAt: null }),
+        set({
+          role: null,
+          name: "",
+          email: "",
+          stream: undefined,
+          picture: null,
+          loggedInAt: null,
+        }),
     }),
     {
       name: "agileportal-auth",
@@ -83,10 +106,12 @@ export const useAuth = create<AuthState>()(
         role: s.role,
         name: s.name,
         email: s.email,
+        stream: s.stream,
         picture: s.picture,
         loggedInAt: s.loggedInAt,
       }),
     },
   ),
 )
+
 

@@ -84,6 +84,14 @@ export function Navbar() {
               Admin Dashboard
             </a>
           )}
+          {mounted && (role === "student" || role === "google") && (
+            <a
+              href="#student"
+              className="rounded-md px-3 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50"
+            >
+              My Dashboard
+            </a>
+          )}
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
@@ -164,6 +172,16 @@ export function Navbar() {
                     className="rounded-md px-3 py-2.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50"
                   >
                     Admin Dashboard
+                  </a>
+                </SheetClose>
+              )}
+              {mounted && (role === "student" || role === "google") && (
+                <SheetClose asChild>
+                  <a
+                    href="#student"
+                    className="rounded-md px-3 py-2.5 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50"
+                  >
+                    My Dashboard
                   </a>
                 </SheetClose>
               )}

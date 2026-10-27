@@ -45,8 +45,10 @@ export function Login() {
     role,
     name,
     email,
+    stream,
     loginAsGuest,
     loginAsAdmin,
+    loginAsStudent,
     logout,
   } = useAuth()
 
@@ -72,10 +74,21 @@ export function Login() {
       })
       return
     }
+    // Sign in as student. The "password" is not validated — this is a
+    // front-end demo until the v2 backend with real NextAuth credentials
+    // is wired. We derive a friendly display name from the email handle.
+    const handle = studentEmail.split("@")[0] || "Student"
+    const pretty = handle
+      .split(/[._-]/)
+      .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+      .join(" ")
+    loginAsStudent(pretty, studentEmail, "View in dashboard")
     toast({
-      title: "Sign-in recorded",
-      description: `${studentEmail} — student dashboard access is on the v2 roadmap.`,
+      title: `Welcome back, ${pretty.split(" ")[0]}!`,
+      description: "Student dashboard is now visible above this section.",
     })
+    setStudentEmail("")
+    setStudentPassword("")
   }
 
   const submitSignup = () => {
@@ -86,9 +99,10 @@ export function Login() {
       })
       return
     }
+    loginAsStudent(signupName, signupEmail, signupStream)
     toast({
-      title: "Sign-up received",
-      description: `Thanks ${signupName.split(" ")[0]} — our team will verify your enrollment within 48 hours.`,
+      title: `Welcome aboard, ${signupName.split(" ")[0]}!`,
+      description: `You're registered for ${signupStream}. Student dashboard is now visible.`,
     })
     setSignupName("")
     setSignupEmail("")
@@ -180,7 +194,15 @@ export function Login() {
                   </p>
                   <p className="text-xs text-muted-foreground">
                     Role: <span className="font-mono">{role}</span> · {email}
+                    {stream && role !== "guest" && role !== "admin" && (
+                      <> · Stream: <span className="font-medium text-foreground">{stream}</span></>
+                    )}
                   </p>
+                  {role === "student" && (
+                    <p className="mt-1 text-xs text-emerald-700">
+                      Your dashboard is visible above the Categories section.
+                    </p>
+                  )}
                 </div>
                 <Button
                   size="sm"
