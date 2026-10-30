@@ -25,6 +25,8 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { WEEKS, PASS_THRESHOLD, type Week } from "./portal-weeks"
 import { useWeeklyProgress } from "./use-weekly-progress"
+import { AIGuidancePanel } from "./ai-guidance-panel"
+import { AISolutionFeedback } from "./ai-solution-feedback"
 
 const QUESTIONS_PER_WEEK = 4
 
@@ -174,6 +176,11 @@ export function WeeklyTasksPanel() {
               onSubmit={(text, url) => handleSolutionSubmit(activeWeek, text, url)}
             />
           </div>
+        </div>
+
+        {/* Full-width: AI guidance for this week */}
+        <div className="mt-6">
+          <AIGuidancePanel week={activeWeek} />
         </div>
       </div>
     </section>
@@ -450,15 +457,19 @@ function SolutionCard({
         </div>
 
         {submittedAt !== null && (
-          <div className="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 p-2.5 text-xs text-emerald-800">
-            <CheckCircle2 className="h-4 w-4 shrink-0" />
-            Submitted on {new Date(submittedAt).toLocaleString()}
-            {!progress?.passed && (
-              <span className="ml-auto text-amber-700">
-                · Note: pass the test above too to unlock the next week
-              </span>
-            )}
-          </div>
+          <>
+            <div className="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 p-2.5 text-xs text-emerald-800">
+              <CheckCircle2 className="h-4 w-4 shrink-0" />
+              Submitted on {new Date(submittedAt).toLocaleString()}
+              {!progress?.passed && (
+                <span className="ml-auto text-amber-700">
+                  · Note: pass the test above too to unlock the next week
+                </span>
+              )}
+            </div>
+            {/* AI mentor feedback — only after submission */}
+            <AISolutionFeedback week={week} solutionText={text} />
+          </>
         )}
       </CardContent>
       <CardFooter className="justify-between border-t bg-muted/30 p-4">
