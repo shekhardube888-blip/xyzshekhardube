@@ -36,7 +36,7 @@ export const NAV_LINKS = [
   { label: "Categories", href: "#categories" },
   { label: "Portal Login", href: "#login" },
   { label: "How It Works", href: "#how" },
-  { label: "Why AgilePortal", href: "#why" },
+  { label: "Why AgilePortal Enterprise", href: "#why" },
   { label: "Student Stories", href: "#stories" },
   { label: "About", href: "#about" },
   { label: "FAQ", href: "#faq" },
@@ -472,7 +472,7 @@ export type FAQ = { q: string; a: string }
 export const FAQS: FAQ[] = [
   {
     q: "Is the internship really free? Are there any hidden charges?",
-    a: "Yes, completely free. There is no registration fee, no course fee, no certificate fee, and no hidden charges of any kind. AgilePortal's mission is to make quality internship programs accessible to every MBA, BBA and BSc student in India, regardless of financial background.",
+    a: "Yes, completely free for student learners. There is no registration fee, no course fee, no certificate fee, and no hidden charges of any kind. AgilePortal Enterprise's mission is to make quality internship programs accessible to every MBA, BBA and BSc student in India, regardless of financial background. (Enterprise orgs pay a per-seat SaaS fee — see the Enterprise plan below.)",
   },
   {
     q: "Will my college accept this certificate for the internship credit requirement?",
@@ -518,13 +518,13 @@ export const FOOTER_LINKS = {
     "End-to-End Data Science Guide",
     "FAQ",
   ],
-  company: ["About Us", "Meet the Mentors", "Student Stories", "Why AgilePortal", "How It Works"],
+  company: ["About Us", "Meet the Mentors", "Student Stories", "Why AgilePortal Enterprise", "How It Works"],
 }
 
 export const CONTACT = {
-  brand: "AgilePortal",
+  brand: "AgilePortal Enterprise",
   tagline:
-    "AgilePortal is a free internship platform serving MBA, BBA and BSc students across India. Live mentoring, real projects, UGC-aligned certificates — at zero cost, always.",
+    "AgilePortal Enterprise is a free internship + enterprise L&D platform serving MBA, BBA and BSc students across India, plus enterprise orgs managing team training cohorts. Live mentoring, real projects, UGC-aligned certificates — at zero cost for students, per-seat SaaS for orgs.",
   website: "agileportal.in",
   email: "training@agileportal.in",
   phone: "+91 80955 57332",

@@ -29,6 +29,8 @@ import {
   useAuth,
   ADMIN_DEMO_EMAIL,
   ADMIN_DEMO_PASSWORD,
+  SUPER_ADMIN_DEMO_EMAIL,
+  SUPER_ADMIN_DEMO_PASSWORD,
 } from "./auth-store"
 import { GoogleSignInButton } from "./google-account-picker"
 
@@ -48,6 +50,7 @@ export function Login() {
     stream,
     loginAsGuest,
     loginAsAdmin,
+    loginAsSuperAdmin,
     loginAsStudent,
     logout,
   } = useAuth()
@@ -65,6 +68,11 @@ export function Login() {
   const [adminUser, setAdminUser] = useState("")
   const [adminPass, setAdminPass] = useState("")
   const [adminError, setAdminError] = useState<string | null>(null)
+
+  // Super Admin tab
+  const [superUser, setSuperUser] = useState("")
+  const [superPass, setSuperPass] = useState("")
+  const [superError, setSuperError] = useState<string | null>(null)
 
   const submitStudentSignIn = () => {
     if (!studentEmail || !studentPassword) {
@@ -131,6 +139,26 @@ export function Login() {
       setAdminError(res.error)
       toast({
         title: "Admin login failed",
+        description: res.error,
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleSuperAdminLogin = () => {
+    setSuperError(null)
+    const res = loginAsSuperAdmin(superUser, superPass)
+    if (res.ok) {
+      toast({
+        title: "Super Admin signed in",
+        description: "Welcome back. Organization Management dashboard is now visible above this section.",
+      })
+      setSuperUser("")
+      setSuperPass("")
+    } else {
+      setSuperError(res.error)
+      toast({
+        title: "Super Admin login failed",
         description: res.error,
         variant: "destructive",
       })
@@ -226,10 +254,11 @@ export function Login() {
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="signin" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="signin">Sign In</TabsTrigger>
                   <TabsTrigger value="signup">Sign Up</TabsTrigger>
                   <TabsTrigger value="admin">Admin</TabsTrigger>
+                  <TabsTrigger value="superadmin">Super Admin</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="signin" className="mt-6 space-y-4">
@@ -398,11 +427,79 @@ export function Login() {
                     Admin login only. Students use Google Sign-In, Guest mode, or the Sign Up tab.
                   </p>
                 </TabsContent>
+
+                <TabsContent value="superadmin" className="mt-6 space-y-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="sa-user">Super Admin Email</Label>
+                    <Input
+                      id="sa-user"
+                      placeholder="superadmin@agileportal.in"
+                      value={superUser}
+                      onChange={(e) => {
+                        setSuperUser(e.target.value)
+                        setSuperError(null)
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="sa-pass">Password</Label>
+                    <Input
+                      id="sa-pass"
+                      type="password"
+                      placeholder="••••••••"
+                      value={superPass}
+                      onChange={(e) => {
+                        setSuperPass(e.target.value)
+                        setSuperError(null)
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleSuperAdminLogin()
+                      }}
+                    />
+                  </div>
+                  {superError && (
+                    <div className="flex items-start gap-2 rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+                      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                      <span>{superError}</span>
+                    </div>
+                  )}
+                  <Button
+                    className="w-full bg-violet-600 hover:bg-violet-700"
+                    onClick={handleSuperAdminLogin}
+                  >
+                    Sign In
+                  </Button>
+
+                  <div className="rounded-lg border border-violet-200 bg-violet-50 p-3">
+                    <p className="flex items-center gap-1.5 text-xs font-semibold">
+                      <Info className="h-3.5 w-3.5 text-violet-600" />
+                      Demo super-admin credentials
+                    </p>
+                    <dl className="mt-2 space-y-1 text-xs text-muted-foreground">
+                      <div className="flex justify-between gap-2">
+                        <dt>Email</dt>
+                        <dd className="font-mono text-foreground">{SUPER_ADMIN_DEMO_EMAIL}</dd>
+                      </div>
+                      <div className="flex justify-between gap-2">
+                        <dt>Password</dt>
+                        <dd className="font-mono text-foreground">{SUPER_ADMIN_DEMO_PASSWORD}</dd>
+                      </div>
+                    </dl>
+                    <p className="mt-2 text-[11px] text-muted-foreground">
+                      On success the Organization Management dashboard appears above this card.
+                      Super Admins can create orgs, add teams, and invite learners.
+                    </p>
+                  </div>
+
+                  <p className="text-center text-xs text-muted-foreground">
+                    Super Admin only — enterprise tier. Use the Admin tab for student-application review.
+                  </p>
+                </TabsContent>
               </Tabs>
             </CardContent>
             <CardFooter className="justify-center">
               <p className="text-xs text-muted-foreground">
-                By continuing you agree to AgilePortal&apos;s Terms &amp; Privacy Policy.
+                By continuing you agree to AgilePortal Enterprise&apos;s Terms &amp; Privacy Policy.
               </p>
             </CardFooter>
           </Card>

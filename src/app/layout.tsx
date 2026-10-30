@@ -15,31 +15,33 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AgilePortal - Industry-Grade Internships for MBA, BBA & BSc Students",
+  title: "AgilePortal Enterprise - Industry-Grade Internships + Enterprise L&D",
   description:
-    "AgilePortal delivers mentor-led, project-based internship programs for MBA, BBA and BSc students across India. UGC & AICTE-aligned, verifiable certificates, 100% online.",
+    "AgilePortal Enterprise delivers mentor-led, project-based internship programs for MBA, BBA and BSc students, plus enterprise organization & team management for corporate L&D cohorts. UGC & AICTE-aligned, verifiable certificates, 100% online.",
   keywords: [
     "MBA Internship",
     "BBA Internship",
     "BSc Internship",
     "Internship for Management Students",
     "Industry Projects",
-    "AgilePortal",
+    "AgilePortal Enterprise",
+    "Enterprise L&D",
+    "Organization Management",
     "Live Mentor-Led Internship",
     "Verifiable Certificate",
   ],
-  authors: [{ name: "AgilePortal" }],
+  authors: [{ name: "AgilePortal Enterprise" }],
   openGraph: {
-    title: "AgilePortal - Industry-Grade Internships for MBA, BBA & BSc Students",
+    title: "AgilePortal Enterprise - Industry-Grade Internships + Enterprise L&D",
     description:
-      "Mentor-led, project-based internship programs for MBA, BBA and BSc students. UGC-aligned certificates, 100% online, completely free.",
-    siteName: "AgilePortal",
+      "Mentor-led, project-based internship programs for MBA, BBA and BSc students + enterprise org & team management. UGC-aligned certificates, 100% online.",
+    siteName: "AgilePortal Enterprise",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "AgilePortal - Internships for MBA, BBA & BSc",
-    description: "Industry-grade, mentor-led internships with verifiable certificates.",
+    title: "AgilePortal Enterprise - Internships + Enterprise L&D",
+    description: "Industry-grade, mentor-led internships with verifiable certificates + enterprise org management.",
   },
 };
 

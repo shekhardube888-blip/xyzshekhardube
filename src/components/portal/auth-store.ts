@@ -3,7 +3,7 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 
-export type Role = "guest" | "admin" | "google" | "student" | null
+export type Role = "guest" | "admin" | "google" | "student" | "super_admin" | null
 
 export type Session = {
   role: Role
@@ -17,6 +17,7 @@ export type Session = {
 type AuthState = Session & {
   loginAsGuest: () => void
   loginAsAdmin: (email: string, password: string) => { ok: true } | { ok: false; error: string }
+  loginAsSuperAdmin: (email: string, password: string) => { ok: true } | { ok: false; error: string }
   loginAsGoogle: (name: string, email: string, picture?: string | null) => void
   loginAsStudent: (name: string, email: string, stream?: string) => void
   logout: () => void
@@ -26,9 +27,14 @@ type AuthState = Session & {
 export const ADMIN_DEMO_EMAIL = "admin@agileportal.in"
 export const ADMIN_DEMO_PASSWORD = "admin123"
 
+// Demo super-admin credentials — org & team management
+export const SUPER_ADMIN_DEMO_EMAIL = "superadmin@agileportal.in"
+export const SUPER_ADMIN_DEMO_PASSWORD = "super123"
+
 const GUEST_NAME = "Guest User"
 const GUEST_EMAIL = "guest@agileportal.in"
-const ADMIN_NAME = "Admin (AgilePortal)"
+const ADMIN_NAME = "Admin (AgilePortal Enterprise)"
+const SUPER_ADMIN_NAME = "Super Admin (AgilePortal Enterprise)"
 
 export const useAuth = create<AuthState>()(
   persist(
@@ -61,6 +67,28 @@ export const useAuth = create<AuthState>()(
         set({
           role: "admin",
           name: ADMIN_NAME,
+          email: cleanEmail,
+          stream: undefined,
+          picture: null,
+          loggedInAt: Date.now(),
+        })
+        return { ok: true }
+      },
+
+      loginAsSuperAdmin: (email, password) => {
+        const cleanEmail = email.trim().toLowerCase()
+        if (cleanEmail !== SUPER_ADMIN_DEMO_EMAIL) {
+          return {
+            ok: false,
+            error: "Unknown super-admin email. Use superadmin@agileportal.in",
+          }
+        }
+        if (password !== SUPER_ADMIN_DEMO_PASSWORD) {
+          return { ok: false, error: "Wrong password. Demo password is super123" }
+        }
+        set({
+          role: "super_admin",
+          name: SUPER_ADMIN_NAME,
           email: cleanEmail,
           stream: undefined,
           picture: null,

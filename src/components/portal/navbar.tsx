@@ -62,7 +62,10 @@ export function Navbar() {
             <Rocket className="h-5 w-5" />
           </span>
           <span className="text-lg font-bold tracking-tight">
-            Agile<span className="text-emerald-600">Portal</span>
+            Agile<span className="text-emerald-600">Portal</span>{" "}
+            <span className="ml-0.5 rounded bg-amber-100 px-1.5 py-0.5 align-middle text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+              Enterprise
+            </span>
           </span>
         </a>
 
@@ -82,6 +85,14 @@ export function Navbar() {
               className="rounded-md px-3 py-2 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50"
             >
               Admin Dashboard
+            </a>
+          )}
+          {mounted && role === "super_admin" && (
+            <a
+              href="#org"
+              className="rounded-md px-3 py-2 text-sm font-medium text-violet-700 transition-colors hover:bg-violet-50"
+            >
+              Org Management
             </a>
           )}
           {mounted && (role === "student" || role === "google") && (
@@ -151,7 +162,7 @@ export function Navbar() {
                 <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-white">
                   <Rocket className="h-4 w-4" />
                 </span>
-                AgilePortal
+                AgilePortal Enterprise
               </SheetTitle>
             </SheetHeader>
             <div className="mt-4 flex flex-col gap-1 px-2">
@@ -172,6 +183,16 @@ export function Navbar() {
                     className="rounded-md px-3 py-2.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50"
                   >
                     Admin Dashboard
+                  </a>
+                </SheetClose>
+              )}
+              {mounted && role === "super_admin" && (
+                <SheetClose asChild>
+                  <a
+                    href="#org"
+                    className="rounded-md px-3 py-2.5 text-sm font-medium text-violet-700 transition-colors hover:bg-violet-50"
+                  >
+                    Org Management
                   </a>
                 </SheetClose>
               )}

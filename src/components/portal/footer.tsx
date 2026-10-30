@@ -20,7 +20,10 @@ export function Footer() {
                 </span>
               </span>
               <span className="text-base font-bold">
-                Agile<span className="text-emerald-400">Portal</span>
+                Agile<span className="text-emerald-400">Portal</span>{" "}
+                <span className="ml-0.5 rounded bg-amber-500/20 px-1.5 py-0.5 align-middle text-[10px] font-semibold uppercase tracking-wide text-amber-300">
+                  Enterprise
+                </span>
               </span>
             </div>
             <p className="mt-3 text-sm text-background/70">{CONTACT.tagline}</p>

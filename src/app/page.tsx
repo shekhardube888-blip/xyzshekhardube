@@ -5,6 +5,7 @@ import { Hero } from "@/components/portal/hero"
 import { Stats } from "@/components/portal/stats"
 import { AdminGate } from "@/components/portal/admin-gate"
 import { StudentGate } from "@/components/portal/student-gate"
+import { OrgGate } from "@/components/portal/org-gate"
 import { Categories } from "@/components/portal/categories"
 import { Login } from "@/components/portal/login"
 import { HowItWorks } from "@/components/portal/how-it-works"
@@ -24,6 +25,7 @@ export default function Home() {
       <main className="flex-1">
         <Hero />
         <Stats />
+        <OrgGate />
         <StudentGate />
         <AdminGate />
         <Categories />

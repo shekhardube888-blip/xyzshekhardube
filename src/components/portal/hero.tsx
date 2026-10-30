@@ -22,7 +22,7 @@ export function Hero() {
         <div className="mx-auto max-w-3xl text-center">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
             <Sparkles className="h-3.5 w-3.5" />
-            UGC-Aligned · Industry Mentor-Led · Verifiable Certificates
+            UGC-Aligned · Industry Mentor-Led · Enterprise-Ready · Verifiable Certificates
           </span>
           <h1 className="mt-6 text-4xl font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl">
             Launch Your Career with Industry-Grade{" "}
@@ -33,9 +33,11 @@ export function Hero() {
           </h1>
           <p className="mt-6 text-base text-muted-foreground sm:text-lg text-pretty">
             Industry-grade Internship Programs in Marketing, Entrepreneurship, Data Science &
-            Biotechnology. AgilePortal delivers mentor-led, project-based training for{" "}
+            Biotechnology. <strong className="font-semibold text-foreground">AgilePortal Enterprise</strong>{" "}
+            delivers mentor-led, project-based training for{" "}
             <strong className="font-semibold text-foreground">MBA · BBA · BSc</strong> students —
-            with verifiable certificates designed for academic credit.
+            with verifiable certificates designed for academic credit. Enterprise orgs manage
+            team training cohorts via the Super Admin dashboard.
           </p>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground">
