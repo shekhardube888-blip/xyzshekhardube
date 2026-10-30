@@ -26,6 +26,7 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "./auth-store"
 import { WeeklyTasksPanel } from "./weekly-tasks-panel"
+import { TestPapersPanel } from "./test-papers-panel"
 
 // Demo per-student data — would be fetched from /api/student/me in v2.
 const PROGRAM_WEEKS = 8
@@ -448,6 +449,9 @@ export function StudentDashboard() {
 
         {/* Weekly tasks + tests + market scenarios + solutions */}
         <WeeklyTasksPanel />
+
+        {/* Formal test papers — timed exams across subjects & internship tracks */}
+        <TestPapersPanel />
       </div>
     </section>
   )
