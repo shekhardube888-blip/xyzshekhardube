@@ -2,7 +2,7 @@
 
 /* eslint-disable react-hooks/set-state-in-effect -- reset decisions on new game start; safe one-shot setState in effect */
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -53,6 +53,9 @@ import {
 } from "./simulation-engine"
 import { useSimulation } from "./simulation-store"
 import { useMounted } from "./use-test-progress"
+import { useLeaderboard } from "./use-leaderboard"
+import { LeaderboardPanel } from "./leaderboard-panel"
+import { useAuth } from "./auth-store"
 
 export function SimulationGamePanel() {
   const mounted = useMounted()
@@ -61,6 +64,8 @@ export function SimulationGamePanel() {
   const [decisions, setDecisions] = useState<Decisions>(SIM_DEFAULT_DECISIONS)
   const [lastResult, setLastResult] = useState<QuarterResult | null>(null)
   const [showResults, setShowResults] = useState(false)
+  const { addUserEntry } = useLeaderboard()
+  const auth = useAuth()
 
   // Reset decisions when a new game starts
   useEffect(() => {
@@ -68,6 +73,60 @@ export function SimulationGamePanel() {
       setDecisions(SIM_DEFAULT_DECISIONS)
     }
   }, [status, history.length])
+
+  // When the game finishes, auto-add the user's entry to the leaderboard
+  // (only once per finished game — gated by a ref that resets when a new
+  // game starts).
+  const recordedRef = useRef(false)
+  useEffect(() => {
+    if (status === "finished" && !recordedRef.current && history.length > 0) {
+      recordedRef.current = true
+
+      const grade = computeFinalGrade({
+        status,
+        currentQuarter,
+        cash,
+        brandEquity,
+        customerSatisfaction,
+        history,
+      })
+      // Derive an anonymous display name from the auth store, falling back to
+      // "Anonymous Student" if not signed in. Format: "Ananya I."
+      const rawName = auth.name?.trim() || "Anonymous Student"
+      const parts = rawName.split(/\s+/)
+      const first = parts[0] || "Student"
+      const lastInitial = parts[1]?.[0] ?? ""
+      const anonymousName = lastInitial
+        ? `${first} ${lastInitial}.`
+        : `${first}.`
+
+      addUserEntry({
+        anonymousName,
+        stream: auth.stream || "Unspecified",
+        grade: grade.grade,
+        finalCash: cash,
+        brandEquity,
+        avgMarketShare: grade.metrics.avgMarketShare,
+        totalProfit: grade.metrics.totalProfit,
+        quartersCompleted: history.length,
+        playedAt: Date.now(),
+      })
+    }
+    // Reset the recording flag when the user starts a new game
+    if (status === "running" && history.length === 0) {
+      recordedRef.current = false
+    }
+  }, [
+    status,
+    history,
+    currentQuarter,
+    cash,
+    brandEquity,
+    customerSatisfaction,
+    addUserEntry,
+    auth.name,
+    auth.stream,
+  ])
 
   if (!mounted) return null
 
@@ -94,7 +153,7 @@ export function SimulationGamePanel() {
     })
     return (
       <section className="border-t border-violet-200 bg-muted/20">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 space-y-6">
           <FinishedCard
             grade={grade}
             history={history}
@@ -106,6 +165,8 @@ export function SimulationGamePanel() {
               setShowResults(false)
             }}
           />
+          {/* Cohort leaderboard — your entry is auto-added when a game finishes */}
+          <LeaderboardPanel />
         </div>
       </section>
     )
