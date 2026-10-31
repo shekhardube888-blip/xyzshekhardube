@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   GraduationCap,
   Trophy,
@@ -22,12 +23,21 @@ import {
   Award,
   BookOpen,
   ArrowRight,
+  ListChecks,
+  Target,
+  Crown,
+  ChevronRight,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "./auth-store"
 import { WeeklyTasksPanel } from "./weekly-tasks-panel"
 import { TestPapersPanel } from "./test-papers-panel"
 import { SimulationGamePanel } from "./simulation-game-panel"
+import { LeaderboardPanel } from "./leaderboard-panel"
+import { useWeeklyProgress } from "./use-weekly-progress"
+import { useTestProgressHelpers, useMounted } from "./use-test-progress"
+import { useSimulation } from "./simulation-store"
+import { SIM_TOTAL_QUARTERS } from "./simulation-engine"
 
 // Demo per-student data — would be fetched from /api/student/me in v2.
 const PROGRAM_WEEKS = 8
@@ -130,6 +140,13 @@ export function StudentDashboard() {
   const [deliverableTitle, setDeliverableTitle] = useState("")
   const [deliverableUrl, setDeliverableUrl] = useState("")
   const [deliverableNotes, setDeliverableNotes] = useState("")
+  const [activeTab, setActiveTab] = useState<string>("overview")
+
+  // Pull stats from each sub-feature to drive the Overview quick-jump cards
+  const mounted = useMounted()
+  const { completedWeeks: weeklyCompleted } = useWeeklyProgress(4)
+  const { stats: testStats } = useTestProgressHelpers()
+  const { status: simStatus, currentQuarter: simQuarter, history: simHistory } = useSimulation()
 
   const progressPct = Math.round((COMPLETED_WEEKS / PROGRAM_WEEKS) * 100)
 
@@ -195,7 +212,17 @@ export function StudentDashboard() {
           })}
         </div>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-3">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="weekly">Weekly Tasks</TabsTrigger>
+            <TabsTrigger value="tests">Test Papers</TabsTrigger>
+            <TabsTrigger value="simulation">Simulation</TabsTrigger>
+            <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="mt-6 space-y-6">
+        <div className="grid gap-6 lg:grid-cols-3">
           {/* LEFT — Program track + progress */}
           <Card className="lg:col-span-2 border-emerald-200">
             <CardHeader>
@@ -448,15 +475,104 @@ export function StudentDashboard() {
           </div>
         </div>
 
-        {/* Weekly tasks + tests + market scenarios + solutions */}
-        <WeeklyTasksPanel />
+            {/* Quick-jump cards — let students jump to any tab from Overview */}
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <QuickJumpCard
+                title="Weekly Tasks"
+                icon={Target}
+                stat={mounted ? `${weeklyCompleted}/${SIM_TOTAL_QUARTERS} weeks` : "—"}
+                description="Tasks, tests, market scenarios + AI guidance"
+                onClick={() => setActiveTab("weekly")}
+                accent="text-emerald-600 bg-emerald-50"
+              />
+              <QuickJumpCard
+                title="Test Papers"
+                icon={ListChecks}
+                stat={mounted ? `${testStats.uniquePassed}/${6} passed` : "—"}
+                description="6 timed MCQ exams across MBA / BBA / BSc"
+                onClick={() => setActiveTab("tests")}
+                accent="text-violet-600 bg-violet-50"
+              />
+              <QuickJumpCard
+                title="Simulation"
+                icon={Crown}
+                stat={
+                  mounted
+                    ? simStatus === "finished"
+                      ? `Grade: ${simHistory.length > 0 ? "View" : "—"}`
+                      : simStatus === "running"
+                      ? `Q${simQuarter} of ${SIM_TOTAL_QUARTERS}`
+                      : "Not started"
+                    : "—"
+                }
+                description="D2C Brand Simulator · 8 quarters"
+                onClick={() => setActiveTab("simulation")}
+                accent="text-amber-600 bg-amber-50"
+              />
+              <QuickJumpCard
+                title="Leaderboard"
+                icon={Trophy}
+                stat={mounted ? "Cohort rank" : "—"}
+                description="Compare your grade vs peers"
+                onClick={() => setActiveTab("leaderboard")}
+                accent="text-teal-600 bg-teal-50"
+              />
+            </div>
+          </TabsContent>
 
-        {/* Formal test papers — timed exams across subjects & internship tracks */}
-        <TestPapersPanel />
+          <TabsContent value="weekly" className="mt-6">
+            <WeeklyTasksPanel />
+          </TabsContent>
 
-        {/* D2C Brand Simulator — MBA/BBA strategy simulation game */}
-        <SimulationGamePanel />
+          <TabsContent value="tests" className="mt-6">
+            <TestPapersPanel />
+          </TabsContent>
+
+          <TabsContent value="simulation" className="mt-6">
+            <SimulationGamePanel />
+          </TabsContent>
+
+          <TabsContent value="leaderboard" className="mt-6">
+            <LeaderboardPanel />
+          </TabsContent>
+        </Tabs>
       </div>
     </section>
+  )
+}
+
+// Quick-jump card component used in the Overview tab
+function QuickJumpCard({
+  title,
+  icon: Icon,
+  stat,
+  description,
+  onClick,
+  accent,
+}: {
+  title: string
+  icon: typeof Target
+  stat: string
+  description: string
+  onClick: () => void
+  accent: string
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="group flex items-start gap-3 rounded-xl border bg-background p-4 text-left transition-all hover:border-violet-300 hover:shadow-md"
+    >
+      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${accent}`}>
+        <Icon className="h-5 w-5" />
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-sm font-semibold text-foreground">{title}</p>
+          <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+        </div>
+        <p className="mt-0.5 text-xs font-medium text-foreground">{stat}</p>
+        <p className="mt-1 text-[11px] text-muted-foreground">{description}</p>
+      </div>
+    </button>
   )
 }
