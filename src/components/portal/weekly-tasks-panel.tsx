@@ -27,11 +27,15 @@ import { WEEKS, PASS_THRESHOLD, type Week } from "./portal-weeks"
 import { useWeeklyProgress } from "./use-weekly-progress"
 import { AIGuidancePanel } from "./ai-guidance-panel"
 import { AISolutionFeedback } from "./ai-solution-feedback"
+import { useApprovalStore } from "./approval-store"
+import { useAuth } from "./auth-store"
 
 const QUESTIONS_PER_WEEK = 4
 
 export function WeeklyTasksPanel() {
   const { toast } = useToast()
+  const createApproval = useApprovalStore((s) => s.createRequest)
+  const auth = useAuth()
   const [activeWeekId, setActiveWeekId] = useState(1)
   const { mounted, getWeek, setAnswer, submitTest, submitSolution, completedWeeks } =
     useWeeklyProgress(QUESTIONS_PER_WEEK)
@@ -71,6 +75,15 @@ export function WeeklyTasksPanel() {
   const handleSolutionSubmit = (week: Week, text: string, url: string) => {
     submitSolution(week.id, text, url)
     const nextWeek = week.id + 1
+    // Auto-create an approval request for the mentor to review
+    createApproval({
+      studentName: auth.name || "Anonymous Student",
+      studentEmail: auth.email || "anonymous@agileportal.in",
+      stream: auth.stream,
+      type: "weekly_solution",
+      stage: `Week ${week.id} — ${week.title}`,
+      detail: `${text.trim().split(/\s+/).length}-word solution for ${week.scenario.brand}. ${url ? `Reference: ${url}` : "No reference link."}`,
+    })
     toast({
       title: `Week ${week.id} solution submitted!`,
       description:

@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { ApprovalQueuePanel } from "./approval-queue-panel"
 import {
   CheckCircle2,
   XCircle,
@@ -217,6 +218,9 @@ export function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Approval queue — review student registrations, solutions, tests, certificates */}
+      <ApprovalQueuePanel />
     </section>
   )
 }

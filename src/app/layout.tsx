@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { NextAuthProvider, AuthSync } from "@/components/portal/session-provider";
+import { MentorChatWidget } from "@/components/portal/mentor-chat-widget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -58,6 +59,7 @@ export default function RootLayout({
         <NextAuthProvider>
           {children}
           <AuthSync />
+          <MentorChatWidget />
         </NextAuthProvider>
         <Toaster />
       </body>
