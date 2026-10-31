@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "./auth-store"
 import { WeeklyTasksPanel } from "./weekly-tasks-panel"
 import { TestPapersPanel } from "./test-papers-panel"
+import { SimulationGamePanel } from "./simulation-game-panel"
 
 // Demo per-student data — would be fetched from /api/student/me in v2.
 const PROGRAM_WEEKS = 8
@@ -452,6 +453,9 @@ export function StudentDashboard() {
 
         {/* Formal test papers — timed exams across subjects & internship tracks */}
         <TestPapersPanel />
+
+        {/* D2C Brand Simulator — MBA/BBA strategy simulation game */}
+        <SimulationGamePanel />
       </div>
     </section>
   )
