@@ -1,11 +1,9 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Navbar } from "@/components/portal/navbar"
 import { Hero } from "@/components/portal/hero"
 import { Stats } from "@/components/portal/stats"
-import { AdminGate } from "@/components/portal/admin-gate"
-import { StudentGate } from "@/components/portal/student-gate"
-import { OrgGate } from "@/components/portal/org-gate"
 import { Categories } from "@/components/portal/categories"
 import { Login } from "@/components/portal/login"
 import { HowItWorks } from "@/components/portal/how-it-works"
@@ -15,29 +13,81 @@ import { Testimonials } from "@/components/portal/testimonials"
 import { About } from "@/components/portal/about"
 import { FAQ } from "@/components/portal/faq"
 import { Footer } from "@/components/portal/footer"
+import { StudentDashboard } from "@/components/portal/student-dashboard"
+import { AdminDashboard } from "@/components/portal/admin-dashboard"
+import { OrgManagementPanel } from "@/components/portal/org-management-panel"
+import { useAuth } from "@/components/portal/auth-store"
+import { useView } from "@/components/portal/use-view"
+import { useMounted } from "@/components/portal/use-test-progress"
 
 export default function Home() {
-  // Section order matches the reference site:
-  // Hero → Stats → Categories → Login → How It Works → Programs → Why Us → Testimonials → About → FAQ
+  const view = useView((s) => s.view)
+  const role = useAuth((s) => s.role)
+  const goToDashboard = useView((s) => s.goToDashboard)
+  const goToMarketing = useView((s) => s.goToMarketing)
+  const mounted = useMounted()
+
+  // Auto-correct the view based on auth state once mounted:
+  //  - If a non-guest role exists AND view === "login" → jump to dashboard
+  //    (covers reload while on the login view but actually already logged in)
+  //  - If no role AND view === "dashboard" → jump back to marketing
+  //    (covers logout while still on dashboard view)
+  useEffect(() => {
+    if (!mounted) return
+    if (view === "login" && role && role !== "guest") {
+      goToDashboard()
+    } else if (view === "dashboard" && !role) {
+      goToMarketing()
+    }
+  }, [mounted, view, role, goToDashboard, goToMarketing])
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
       <main className="flex-1">
-        <Hero />
-        <Stats />
-        <OrgGate />
-        <StudentGate />
-        <AdminGate />
-        <Categories />
-        <Login />
-        <HowItWorks />
-        <Programs />
-        <WhyUs />
-        <Testimonials />
-        <About />
-        <FAQ />
+        {view === "marketing" && <MarketingView />}
+        {view === "login" && <LoginView />}
+        {view === "dashboard" && <DashboardView />}
       </main>
       <Footer />
     </div>
   )
+}
+
+function MarketingView() {
+  // Note: the login section is intentionally NOT in this view — it lives in
+  // its own "login" view now. The marketing page is purely the landing page.
+  return (
+    <>
+      <Hero />
+      <Stats />
+      <Categories />
+      <Programs />
+      <HowItWorks />
+      <WhyUs />
+      <Testimonials />
+      <About />
+      <FAQ />
+    </>
+  )
+}
+
+function LoginView() {
+  return <Login />
+}
+
+function DashboardView() {
+  const role = useAuth((s) => s.role)
+  const mounted = useMounted()
+
+  // Wait for client-side mount before rendering — auth role comes from
+  // localStorage (Zustand persist) and isn't available during SSR.
+  if (!mounted) return null
+
+  if (role === "admin") return <AdminDashboard />
+  if (role === "super_admin") return <OrgManagementPanel />
+  if (role === "student" || role === "google") return <StudentDashboard />
+  // Guests / logged-out users shouldn't reach the dashboard view — the
+  // auto-correction effect in Home() bounces them back to marketing.
+  return null
 }

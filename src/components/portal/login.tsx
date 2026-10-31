@@ -32,6 +32,7 @@ import {
   SUPER_ADMIN_DEMO_EMAIL,
   SUPER_ADMIN_DEMO_PASSWORD,
 } from "./auth-store"
+import { useView } from "./use-view"
 import { GoogleSignInButton } from "./google-account-picker"
 
 const TRUST_BADGES = [
@@ -43,6 +44,7 @@ const TRUST_BADGES = [
 
 export function Login() {
   const { toast } = useToast()
+  const goToDashboard = useView((s) => s.goToDashboard)
   const {
     role,
     name,
@@ -82,9 +84,6 @@ export function Login() {
       })
       return
     }
-    // Sign in as student. The "password" is not validated — this is a
-    // front-end demo until the v2 backend with real NextAuth credentials
-    // is wired. We derive a friendly display name from the email handle.
     const handle = studentEmail.split("@")[0] || "Student"
     const pretty = handle
       .split(/[._-]/)
@@ -93,10 +92,11 @@ export function Login() {
     loginAsStudent(pretty, studentEmail, "View in dashboard")
     toast({
       title: `Welcome back, ${pretty.split(" ")[0]}!`,
-      description: "Student dashboard is now visible above this section.",
+      description: "Opening your student dashboard…",
     })
     setStudentEmail("")
     setStudentPassword("")
+    goToDashboard()
   }
 
   const submitSignup = () => {
@@ -110,19 +110,21 @@ export function Login() {
     loginAsStudent(signupName, signupEmail, signupStream)
     toast({
       title: `Welcome aboard, ${signupName.split(" ")[0]}!`,
-      description: `You're registered for ${signupStream}. Student dashboard is now visible.`,
+      description: `You're registered for ${signupStream}. Opening your dashboard…`,
     })
     setSignupName("")
     setSignupEmail("")
     setSignupStream("")
+    goToDashboard()
   }
 
   const handleGuestLogin = () => {
     loginAsGuest()
     toast({
       title: "Welcome, Guest!",
-      description: "You can browse all programs, projects and testimonials freely.",
+      description: "You can browse all programs and testimonials freely.",
     })
+    // Guest stays on the marketing view — no dashboard to show
   }
 
   const handleAdminLogin = () => {
@@ -131,10 +133,11 @@ export function Login() {
     if (res.ok) {
       toast({
         title: "Admin signed in",
-        description: "Welcome back. Admin Dashboard is now visible above this section.",
+        description: "Opening the admin applications dashboard…",
       })
       setAdminUser("")
       setAdminPass("")
+      goToDashboard()
     } else {
       setAdminError(res.error)
       toast({
@@ -151,10 +154,11 @@ export function Login() {
     if (res.ok) {
       toast({
         title: "Super Admin signed in",
-        description: "Welcome back. Organization Management dashboard is now visible above this section.",
+        description: "Opening the organization management dashboard…",
       })
       setSuperUser("")
       setSuperPass("")
+      goToDashboard()
     } else {
       setSuperError(res.error)
       toast({
@@ -169,90 +173,27 @@ export function Login() {
     const wasGoogle = role === "google"
     logout()
     if (wasGoogle) {
-      // Also clear the NextAuth session if there is one
       signOut({ redirect: false }).catch(() => {
-        /* ignore — signOut can fail when there's no NextAuth session, that's fine */
+        /* ignore */
       })
     }
     toast({
       title: "Logged out",
-      description: "Session cleared. You can browse as guest or sign back in any time.",
+      description: "Session cleared. Returning to the landing page.",
     })
+    useView.getState().goToMarketing()
   }
 
   return (
-    <section id="login" className="border-b bg-muted/30 scroll-mt-20">
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-        <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-emerald-600">
-              Portal Login
-            </p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-              Sign in to access your dashboard
-            </h2>
-            <p className="mt-4 text-base text-muted-foreground sm:text-lg">
-              Students: sign in with Google, email + password, or continue as a guest to
-              browse. Admin: use the demo credentials shown in the Admin tab. New here?
-              Use the Sign Up tab to register as a student — onboarding takes under 60
-              seconds.
-            </p>
-
-            <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {TRUST_BADGES.map((b) => {
-                const Icon = b.icon
-                return (
-                  <li
-                    key={b.label}
-                    className="flex flex-col items-center gap-2 rounded-lg border bg-background p-3 text-center"
-                  >
-                    <Icon className="h-5 w-5 text-emerald-600" />
-                    <span className="text-xs font-medium">{b.label}</span>
-                  </li>
-                )
-              })}
-            </ul>
-
-            {role && (
-              <div className="mt-6 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-                <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-foreground">
-                    Signed in as {name}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Role: <span className="font-mono">{role}</span> · {email}
-                    {stream && role !== "guest" && role !== "admin" && (
-                      <> · Stream: <span className="font-medium text-foreground">{stream}</span></>
-                    )}
-                  </p>
-                  {role === "student" && (
-                    <p className="mt-1 text-xs text-emerald-700">
-                      Your dashboard is visible above the Categories section.
-                    </p>
-                  )}
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleLogout}
-                  className="border-emerald-300 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"
-                >
-                  <LogOut className="mr-1.5 h-4 w-4" />
-                  Logout
-                </Button>
-              </div>
-            )}
-          </div>
-
-          <Card className="shadow-md">
-            <CardHeader>
-              <CardTitle>AgilePortal Access</CardTitle>
-              <CardDescription>
-                Pick a tab to sign in or register. Students are 100% free.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+    <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md flex-col justify-center px-4 py-10 sm:px-6">
+      <Card className="shadow-md">
+        <CardHeader>
+          <CardTitle>AgilePortal Enterprise Access</CardTitle>
+          <CardDescription>
+            Pick a tab to sign in or register. Students are 100% free.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
               <Tabs defaultValue="signin" className="w-full">
                 <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="signin">Sign In</TabsTrigger>
@@ -503,8 +444,50 @@ export function Login() {
               </p>
             </CardFooter>
           </Card>
+
+          {/* Already-signed-in panel — kept below the card so a logged-in user
+              who navigates back to the login view can still see + clear session */}
+          {role && (
+            <div className="mt-4 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground">
+                  Signed in as {name}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Role: <span className="font-mono">{role}</span> · {email}
+                  {stream && role !== "guest" && role !== "admin" && (
+                    <> · Stream: <span className="font-medium text-foreground">{stream}</span></>
+                  )}
+                </p>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleLogout}
+                className="border-emerald-300 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"
+              >
+                <LogOut className="mr-1.5 h-4 w-4" />
+                Logout
+              </Button>
+            </div>
+          )}
+
+          {/* Trust badges row, kept compact under the card */}
+          <ul className="mt-6 grid grid-cols-4 gap-2">
+            {TRUST_BADGES.map((b) => {
+              const Icon = b.icon
+              return (
+                <li
+                  key={b.label}
+                  className="flex flex-col items-center gap-1 rounded-lg border bg-background p-2 text-center"
+                >
+                  <Icon className="h-4 w-4 text-emerald-600" />
+                  <span className="text-[10px] font-medium">{b.label}</span>
+                </li>
+              )
+            })}
+          </ul>
         </div>
-      </div>
-    </section>
   )
 }
