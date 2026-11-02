@@ -34,6 +34,7 @@ import {
 } from "./auth-store"
 import { useView } from "./use-view"
 import { GoogleSignInButton } from "./google-account-picker"
+import { RegistrationWizard } from "./registration-wizard"
 
 const TRUST_BADGES = [
   { label: "AICTE-Aligned", icon: BadgeCheck },
@@ -262,44 +263,8 @@ export function Login() {
                   </p>
                 </TabsContent>
 
-                <TabsContent value="signup" className="mt-6 space-y-4">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="su-name">Full Name</Label>
-                    <Input
-                      id="su-name"
-                      placeholder="Aditya Sharma"
-                      value={signupName}
-                      onChange={(e) => setSignupName(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="su-email">Student Email</Label>
-                    <Input
-                      id="su-email"
-                      type="email"
-                      placeholder="you@college.edu"
-                      value={signupEmail}
-                      onChange={(e) => setSignupEmail(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="su-stream">Degree Stream</Label>
-                    <Input
-                      id="su-stream"
-                      placeholder="MBA / BBA / BSc — specialization"
-                      value={signupStream}
-                      onChange={(e) => setSignupStream(e.target.value)}
-                    />
-                  </div>
-                  <Button
-                    className="w-full bg-emerald-600 hover:bg-emerald-700"
-                    onClick={submitSignup}
-                  >
-                    Register Free
-                  </Button>
-                  <p className="text-center text-xs text-muted-foreground">
-                    No documents · No fee · Onboarding in under 60 seconds
-                  </p>
+                <TabsContent value="signup" className="mt-6">
+                  <RegistrationWizard />
                 </TabsContent>
 
                 <TabsContent value="admin" className="mt-6 space-y-4">

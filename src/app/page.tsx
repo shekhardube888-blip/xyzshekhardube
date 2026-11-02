@@ -16,6 +16,7 @@ import { Footer } from "@/components/portal/footer"
 import { StudentDashboard } from "@/components/portal/student-dashboard"
 import { AdminDashboard } from "@/components/portal/admin-dashboard"
 import { OrgManagementPanel } from "@/components/portal/org-management-panel"
+import { PendingApproval } from "@/components/portal/pending-approval"
 import { useAuth } from "@/components/portal/auth-store"
 import { useView } from "@/components/portal/use-view"
 import { useMounted } from "@/components/portal/use-test-progress"
@@ -23,6 +24,7 @@ import { useMounted } from "@/components/portal/use-test-progress"
 export default function Home() {
   const view = useView((s) => s.view)
   const role = useAuth((s) => s.role)
+  const registrationStatus = useAuth((s) => s.registrationStatus)
   const goToDashboard = useView((s) => s.goToDashboard)
   const goToMarketing = useView((s) => s.goToMarketing)
   const mounted = useMounted()
@@ -30,16 +32,27 @@ export default function Home() {
   // Auto-correct the view based on auth state once mounted:
   //  - If a non-guest role exists AND view === "login" → jump to dashboard
   //    (covers reload while on the login view but actually already logged in)
+  //  EXCEPT for students mid-registration (registered/paid/rejected) — they
+  //  need to stay in the login view so the RegistrationWizard can complete
+  //  the payment step, and the PendingApproval screen takes over only after
+  //  they click "Go to my dashboard".
   //  - If no role AND view === "dashboard" → jump back to marketing
-  //    (covers logout while still on dashboard view)
   useEffect(() => {
     if (!mounted) return
     if (view === "login" && role && role !== "guest") {
+      // Students who haven't finished registration stay in the login view
+      if (
+        role === "student" &&
+        registrationStatus !== "approved" &&
+        registrationStatus !== "none"
+      ) {
+        return
+      }
       goToDashboard()
     } else if (view === "dashboard" && !role) {
       goToMarketing()
     }
-  }, [mounted, view, role, goToDashboard, goToMarketing])
+  }, [mounted, view, role, registrationStatus, goToDashboard, goToMarketing])
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -78,6 +91,7 @@ function LoginView() {
 
 function DashboardView() {
   const role = useAuth((s) => s.role)
+  const registrationStatus = useAuth((s) => s.registrationStatus)
   const mounted = useMounted()
 
   // Wait for client-side mount before rendering — auth role comes from
@@ -86,7 +100,19 @@ function DashboardView() {
 
   if (role === "admin") return <AdminDashboard />
   if (role === "super_admin") return <OrgManagementPanel />
-  if (role === "student" || role === "google") return <StudentDashboard />
+
+  // Student / google roles: gate on registration status
+  if (role === "student" || role === "google") {
+    // If registration is paid but not yet approved, show the pending screen
+    if (registrationStatus === "paid" || registrationStatus === "registered" || registrationStatus === "rejected") {
+      return <PendingApproval />
+    }
+    // If approved (or legacy direct-login which sets approved), show dashboard
+    if (registrationStatus === "approved" || registrationStatus === "none") {
+      return <StudentDashboard />
+    }
+  }
+
   // Guests / logged-out users shouldn't reach the dashboard view — the
   // auto-correction effect in Home() bounces them back to marketing.
   return null
