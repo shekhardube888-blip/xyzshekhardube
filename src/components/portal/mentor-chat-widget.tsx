@@ -21,6 +21,7 @@ import { useWeeklyProgress } from "./use-weekly-progress"
 import { useTestProgressHelpers, useMounted } from "./use-test-progress"
 import { useSimulation } from "./simulation-store"
 import { useApprovalStore } from "./approval-store"
+import { useOrgStore } from "./org-store"
 import { SIM_TOTAL_QUARTERS, computeFinalGrade } from "./simulation-engine"
 
 type ChatMessage = {
@@ -31,22 +32,87 @@ type ChatMessage = {
 }
 
 const STORAGE_KEY = "agileportal-mentor-chat"
-const SUGGESTED_PROMPTS = [
-  "What should I focus on this week?",
-  "How do I improve my market share in the simulation?",
-  "Explain the brand audit framework",
-  "What's my current progress?",
-]
+
+// Role-specific configuration: label, icon color, welcome message, suggested prompts
+const ROLE_CONFIG: Record<
+  string,
+  {
+    label: string
+    headerColor: string
+    buttonColor: string
+    welcome: string
+    prompts: string[]
+  }
+> = {
+  student: {
+    label: "AI Mentor",
+    headerColor: "bg-violet-600",
+    buttonColor: "bg-violet-600 hover:bg-violet-700",
+    welcome: "I'm your AI mentor. Ask me about your weekly tasks, tests, the simulation, or the approval process.",
+    prompts: [
+      "What should I focus on this week?",
+      "How do I improve my market share in the simulation?",
+      "Explain the brand audit framework",
+      "What's my current progress?",
+    ],
+  },
+  admin: {
+    label: "Admin Assistant",
+    headerColor: "bg-amber-600",
+    buttonColor: "bg-amber-600 hover:bg-amber-700",
+    welcome: "I'm your admin assistant. Ask me about the approval queue, reviewing submissions, or student applications.",
+    prompts: [
+      "How many pending approvals do I have?",
+      "What should I look for when reviewing a weekly solution?",
+      "How do I reject a registration with feedback?",
+      "What are the 4 approval types?",
+    ],
+  },
+  super_admin: {
+    label: "Enterprise Guide",
+    headerColor: "bg-violet-700",
+    buttonColor: "bg-violet-700 hover:bg-violet-800",
+    welcome: "I'm your enterprise guide. Ask me about creating orgs, managing teams, or inviting learners.",
+    prompts: [
+      "How do I create a new organization?",
+      "What's the enterprise role hierarchy?",
+      "How do I invite learners to a team?",
+      "Show me enterprise org stats",
+    ],
+  },
+  guest: {
+    label: "AI Guide",
+    headerColor: "bg-emerald-600",
+    buttonColor: "bg-emerald-600 hover:bg-emerald-700",
+    welcome: "I'm the AI guide for AgilePortal Enterprise. Ask me about the platform or how to register.",
+    prompts: [
+      "What is AgilePortal Enterprise?",
+      "How do I register for an internship?",
+      "What tracks are available?",
+      "How much does registration cost?",
+    ],
+  },
+  default: {
+    label: "AI Mentor",
+    headerColor: "bg-violet-600",
+    buttonColor: "bg-violet-600 hover:bg-violet-700",
+    welcome: "I'm here to help. Ask me anything about AgilePortal Enterprise.",
+    prompts: ["What can I do here?"],
+  },
+}
 
 export function MentorChatWidget() {
   const mounted = useMounted()
   const { toast } = useToast()
-  const { role, name, email, stream } = useAuth()
+  const { role, name, email, stream, registrationStatus } = useAuth()
   const view = useView((s) => s.view)
   const { completedWeeks } = useWeeklyProgress(4)
   const { stats: testStats } = useTestProgressHelpers()
   const { status: simStatus, currentQuarter: simQuarter, history: simHistory } = useSimulation()
   const { requests: approvalRequests } = useApprovalStore()
+  const { orgs, teams, invites } = useOrgStore()
+
+  const config = ROLE_CONFIG[role ?? "default"] ?? ROLE_CONFIG.default
 
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -101,23 +167,51 @@ export function MentorChatWidget() {
     (r) => r.studentEmail.toLowerCase() === (email ?? "").toLowerCase() && r.status === "pending",
   ).length
 
-  const buildContext = () => ({
-    studentName: name || undefined,
-    studentEmail: email || undefined,
-    stream: stream || undefined,
-    role: role ?? undefined,
-    currentView: view,
-    activeTab: view === "dashboard" ? "student dashboard" : undefined,
-    weeklyCompleted,
-    weeklyTotal: SIM_TOTAL_QUARTERS,
-    testsPassed: testStats.uniquePassed,
-    testsTotal: 6,
-    simStatus,
-    simQuarter,
-    simTotalQuarters: SIM_TOTAL_QUARTERS,
-    simGrade,
-    pendingApprovals,
-  })
+  const buildContext = () => {
+    const base: Record<string, unknown> = {
+      studentName: name || undefined,
+      studentEmail: email || undefined,
+      stream: stream || undefined,
+      role: role ?? undefined,
+      currentView: view,
+      activeTab: view === "dashboard" ? "dashboard" : undefined,
+    }
+
+    if (role === "student" || role === "google") {
+      base.weeklyCompleted = weeklyCompleted
+      base.weeklyTotal = SIM_TOTAL_QUARTERS
+      base.testsPassed = testStats.uniquePassed
+      base.testsTotal = 6
+      base.simStatus = simStatus
+      base.simQuarter = simQuarter
+      base.simTotalQuarters = SIM_TOTAL_QUARTERS
+      base.simGrade = simGrade
+      base.pendingApprovals = pendingApprovals
+      base.registrationStatus = registrationStatus
+    } else if (role === "admin") {
+      const pending = approvalRequests.filter((r) => r.status === "pending").length
+      const approved = approvalRequests.filter((r) => r.status === "approved").length
+      const rejected = approvalRequests.filter((r) => r.status === "rejected").length
+      base.approvalStats = {
+        pending,
+        approved,
+        rejected,
+        total: approvalRequests.length,
+      }
+      base.applicationsCount = 6 // demo applications in the admin table
+    } else if (role === "super_admin") {
+      const managers = invites.filter((i) => i.role === "manager" && i.status === "accepted").length
+      const pendingInvites = invites.filter((i) => i.status === "pending").length
+      base.orgStats = {
+        orgs: orgs.length,
+        teams: teams.length,
+        managers,
+        pendingInvites,
+      }
+    }
+
+    return base
+  }
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || loading) return
@@ -191,8 +285,8 @@ export function MentorChatWidget() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-violet-600 text-white shadow-lg transition-all hover:bg-violet-700 hover:shadow-xl hover:scale-105"
-          aria-label="Open AI mentor chat"
+          className={`fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg transition-all hover:shadow-xl hover:scale-105 ${config.buttonColor}`}
+          aria-label={`Open ${config.label} chat`}
         >
           <Sparkles className="h-6 w-6" />
           <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white">
@@ -205,15 +299,15 @@ export function MentorChatWidget() {
       {open && (
         <div className="fixed bottom-6 right-6 z-50 flex h-[520px] w-[calc(100vw-3rem)] max-w-[400px] flex-col overflow-hidden rounded-xl border border-violet-200 bg-background shadow-2xl">
           {/* Header */}
-          <div className="flex items-center justify-between border-b bg-violet-600 px-4 py-3 text-white">
+          <div className={`flex items-center justify-between border-b px-4 py-3 text-white ${config.headerColor}`}>
             <div className="flex items-center gap-2">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
                 <Bot className="h-5 w-5" />
               </span>
               <div>
-                <p className="text-sm font-semibold">AI Mentor</p>
+                <p className="text-sm font-semibold">{config.label}</p>
                 <p className="text-[10px] opacity-80">
-                  {role ? `Context: ${role}` : "Here to help"}
+                  {role ? `Context: ${role.replace("_", " ")}` : "Here to help"}
                 </p>
               </div>
             </div>
@@ -239,18 +333,17 @@ export function MentorChatWidget() {
           <div ref={scrollRef} className="flex-1 overflow-y-auto bg-muted/20 p-3 space-y-3">
             {messages.length === 0 ? (
               <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
-                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 text-violet-600">
+                <span className={`flex h-12 w-12 items-center justify-center rounded-full ${config.headerColor} text-white`}>
                   <Sparkles className="h-6 w-6" />
                 </span>
                 <div>
                   <p className="text-sm font-semibold text-foreground">Hi{name ? `, ${name.split(" ")[0]}` : ""}! 👋</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    I&apos;m your AI mentor. Ask me about your weekly tasks, tests, the
-                    simulation, or the approval process.
+                    {config.welcome}
                   </p>
                 </div>
                 <div className="flex w-full flex-col gap-1.5">
-                  {SUGGESTED_PROMPTS.map((p) => (
+                  {config.prompts.map((p) => (
                     <button
                       key={p}
                       onClick={() => sendMessage(p)}
@@ -275,7 +368,7 @@ export function MentorChatWidget() {
                   <div
                     className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
                       m.role === "user"
-                        ? "bg-violet-600 text-white"
+                        ? `${config.headerColor} text-white`
                         : "bg-background border text-foreground"
                     }`}
                   >
