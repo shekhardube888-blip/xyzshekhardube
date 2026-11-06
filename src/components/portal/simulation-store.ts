@@ -5,38 +5,51 @@ import { persist } from "zustand/middleware"
 import {
   initialState,
   runQuarter,
-  SIM_TOTAL_QUARTERS,
   type Decisions,
   type GameState,
   type QuarterResult,
 } from "./simulation-engine"
+import { getConfigById, getConfigForStream, type SimulationConfig } from "./simulation-configs"
 
 type SimStore = GameState & {
-  startGame: () => void
+  configId: string
+  startGame: (config?: SimulationConfig) => void
   resetGame: () => void
   advanceQuarter: (decisions: Decisions) => QuarterResult
+  setConfig: (config: SimulationConfig) => void
 }
 
 export const useSimulation = create<SimStore>()(
   persist(
     (set, get) => ({
-      ...initialState(),
+      ...initialState(getConfigForStream()),
+      configId: getConfigForStream().id,
 
-      startGame: () => set({ ...initialState(), status: "running" }),
+      startGame: (config) => {
+        const c = config ?? getConfigById(get().configId) ?? getConfigForStream()
+        set({ ...initialState(c), status: "running", configId: c.id })
+      },
 
-      resetGame: () => set({ ...initialState() }),
+      resetGame: () => {
+        const c = getConfigById(get().configId) ?? getConfigForStream()
+        set({ ...initialState(c), configId: c.id })
+      },
+
+      setConfig: (config) => {
+        set({ ...initialState(config), configId: config.id })
+      },
 
       advanceQuarter: (decisions) => {
         const state = get()
+        const config = getConfigById(state.configId) ?? getConfigForStream()
         if (state.status !== "running") {
           throw new Error("Game not running")
         }
-        const result = runQuarter(state, decisions)
+        const result = runQuarter(state, decisions, config)
         const nextQuarter = state.currentQuarter + 1
-        const isLast = state.currentQuarter >= SIM_TOTAL_QUARTERS
+        const isLast = state.currentQuarter >= config.totalQuarters
         const nextCash = result.cashAfter
 
-        // If bankrupt, end the game immediately
         const finished = isLast || nextCash < 0
 
         set({
@@ -60,6 +73,7 @@ export const useSimulation = create<SimStore>()(
         brandEquity: s.brandEquity,
         customerSatisfaction: s.customerSatisfaction,
         history: s.history,
+        configId: s.configId,
       }),
     },
   ),

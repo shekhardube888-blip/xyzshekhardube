@@ -1,16 +1,10 @@
 // D2C Brand Simulator — business simulation engine (MBA/BBA syllabus style).
-// Students run a fictional D2C brand across 8 quarters, making pricing /
-// marketing / R&D / production / channel decisions each quarter. The engine
-// computes demand, revenue, costs, profit, market share vs 3 AI competitors,
-// brand equity, and customer satisfaction. Final grade A/B/C/D.
+// Now config-driven: accepts a SimulationConfig that defines the decision
+// parameters, market context, AI competitors, and grade thresholds.
 
-export type Decisions = {
-  price: number // ₹ per unit (range 100–500)
-  marketing: number // ₹ total spend (range 0–1,000,000)
-  rnd: number // ₹ R&D investment (range 0–1,000,000)
-  production: number // units produced (range 0–20,000)
-  channelOnline: number // 0–100 (% online vs retail)
-}
+import type { SimulationConfig, DecisionParam } from "./simulation-configs"
+
+export type Decisions = Record<string, number>
 
 export type CompetitorResult = {
   name: string
@@ -25,7 +19,7 @@ export type QuarterResult = {
   unitsSold: number
   revenue: number
   costs: {
-    production: number
+    variable: number
     marketing: number
     rnd: number
     fixed: number
@@ -37,110 +31,69 @@ export type QuarterResult = {
   customerSatisfactionAfter: number // 0–100
   cashAfter: number
   competitors: CompetitorResult[]
-  headline: string // one-line news-style summary for the quarter
+  headline: string
 }
 
 export type GameState = {
   status: "intro" | "running" | "finished"
-  currentQuarter: number // 1..8
+  currentQuarter: number
   cash: number
   brandEquity: number
   customerSatisfaction: number
   history: QuarterResult[]
 }
 
-// ---- Constants ----
-
-export const SIM_TOTAL_QUARTERS = 8
-const TOTAL_MARKET_DEMAND = 50000 // units/quarter
-const VARIABLE_COST_PER_UNIT = 100 // ₹
-const FIXED_COST_PER_QUARTER = 500000 // ₹
-const STARTING_CASH = 5_000_000 // ₹5M
-const STARTING_BRAND_EQUITY = 50
-const STARTING_CSAT = 50
-
-export const SIM_DEFAULT_DECISIONS: Decisions = {
-  price: 250,
-  marketing: 400000,
-  rnd: 250000,
-  production: 10000,
-  channelOnline: 70,
+export type FinalGrade = {
+  grade: "A" | "B" | "C" | "D"
+  summary: string
+  metrics: {
+    cash: number
+    brandEquity: number
+    avgMarketShare: number
+    totalProfit: number
+  }
 }
 
-export const SIM_CONSTANTS = {
-  TOTAL_MARKET_DEMAND,
-  VARIABLE_COST_PER_UNIT,
-  FIXED_COST_PER_QUARTER,
-  STARTING_CASH,
-  STARTING_BRAND_EQUITY,
-  STARTING_CSAT,
+// ─── Attractiveness model (config-driven) ───
+function attractiveness(
+  decisions: Decisions,
+  brandEquity: number,
+  config: SimulationConfig,
+): number {
+  let score = 0
+  let totalWeight = 0
+  for (const param of config.decisions) {
+    if (param.weight <= 0) continue
+    const raw = decisions[param.key] ?? param.default
+    // Normalize to 0-100
+    let normalized = Math.min(100, (raw / param.scale) * 100)
+    // Inverted params (e.g., lower price = more attractive)
+    if (param.inverted) {
+      normalized = 100 - normalized
+    }
+    score += normalized * param.weight
+    totalWeight += param.weight
+  }
+  // Add brand equity (always weight = remaining)
+  const equityWeight = 1 - totalWeight
+  score += brandEquity * equityWeight
+  return score
 }
 
-type AICompetitor = {
-  name: string
-  strategy: Decisions
-  brandEquity: number
-}
-
-const AI_COMPETITORS: AICompetitor[] = [
-  {
-    name: "ValueMart",
-    strategy: { price: 150, marketing: 200000, rnd: 100000, production: 18000, channelOnline: 80 },
-    brandEquity: 55,
-  },
-  {
-    name: "PremiumCo",
-    strategy: { price: 350, marketing: 800000, rnd: 600000, production: 5000, channelOnline: 40 },
-    brandEquity: 75,
-  },
-  {
-    name: "MidBrand",
-    strategy: { price: 240, marketing: 500000, rnd: 300000, production: 12000, channelOnline: 60 },
-    brandEquity: 65,
-  },
-]
-
-export function getAICompetitors(): AICompetitor[] {
-  return AI_COMPETITORS
-}
-
-// ---- Attractiveness model ----
-// Combines price competitiveness, marketing, R&D quality, channel mix, and
-// brand equity into a single 0–100 attractiveness score. Market share is
-// then allocated proportionally to attractiveness across all 4 players.
-function attractiveness(d: Decisions, brandEquity: number): number {
-  // Lower price = higher attractiveness (₹100 → 80, ₹500 → 0)
-  const priceScore = Math.max(0, 100 - d.price / 5)
-  // Marketing: ₹0 → 0, ₹1,000,000 → 100
-  const marketingScore = Math.min(100, d.marketing / 10000)
-  // R&D quality: ₹0 → 0, ₹1,000,000 → 100
-  const rndScore = Math.min(100, d.rnd / 10000)
-  // Channel mix (online favors digital-native audience for D2C)
-  const channelScore = d.channelOnline
-  // Brand equity is itself 0–100
-  const equityScore = brandEquity
-
-  // Weighted sum
-  return (
-    priceScore * 0.25 +
-    marketingScore * 0.25 +
-    rndScore * 0.2 +
-    channelScore * 0.1 +
-    equityScore * 0.2
-  )
-}
-
-// ---- Quarter computation ----
-
-export function runQuarter(state: GameState, decisions: Decisions): QuarterResult {
+// ─── Quarter computation (config-driven) ───
+export function runQuarter(
+  state: GameState,
+  decisions: Decisions,
+  config: SimulationConfig,
+): QuarterResult {
   const quarter = state.currentQuarter
 
   // Compute attractiveness for student + all AI competitors
-  const studentAttr = attractiveness(decisions, state.brandEquity)
-  const aiResults = AI_COMPETITORS.map((ai) => ({
+  const studentAttr = attractiveness(decisions, state.brandEquity, config)
+  const aiResults = config.competitors.map((ai) => ({
     name: ai.name,
     decisions: ai.strategy,
-    attractiveness: attractiveness(ai.strategy, ai.brandEquity),
+    attractiveness: attractiveness(ai.strategy, ai.brandEquity, config),
   }))
 
   const totalAttr = studentAttr + aiResults.reduce((sum, ai) => sum + ai.attractiveness, 0)
@@ -154,40 +107,51 @@ export function runQuarter(state: GameState, decisions: Decisions): QuarterResul
   }))
 
   // Demand for student's brand
-  const demand = Math.round((TOTAL_MARKET_DEMAND * studentShare) / 100)
-  const unitsSold = Math.min(demand, decisions.production)
-  const stockout = Math.max(0, demand - decisions.production)
+  const demand = Math.round((config.totalMarketDemand * studentShare) / 100)
+
+  // Production/supply decision — find the "production" param
+  const productionParam = config.decisions.find((d) => d.key === "production")
+  const production = productionParam ? (decisions.production ?? productionParam.default) : demand
+  const unitsSold = Math.min(demand, production)
+  const stockout = Math.max(0, demand - production)
 
   // Revenue
-  const revenue = unitsSold * decisions.price
+  const priceParam = config.decisions.find((d) => d.key === "price")
+  const price = priceParam ? (decisions.price ?? priceParam.default) : 100
+  const revenue = unitsSold * price
 
   // Costs
-  const productionCost = decisions.production * VARIABLE_COST_PER_UNIT
-  const marketingCost = decisions.marketing
-  const rndCost = decisions.rnd
-  const fixedCost = FIXED_COST_PER_QUARTER
-  const totalCosts = productionCost + marketingCost + rndCost + fixedCost
+  const variableCost = production * config.variableCostPerUnit
+  const marketingParam = config.decisions.find((d) => d.key === "marketing")
+  const marketingCost = marketingParam ? (decisions.marketing ?? marketingParam.default) : 0
+  const rndParam = config.decisions.find((d) => d.key === "rnd")
+  const rndCost = rndParam ? (decisions.rnd ?? rndParam.default) : 0
+  const fixedCost = config.fixedCostPerRound
+  const totalCosts = variableCost + marketingCost + rndCost + fixedCost
 
   // Profit
   const profit = revenue - totalCosts
 
-  // Brand equity update: R&D builds equity (+2 per ₹100K), marketing builds
-  // equity (+1 per ₹100K), losses reduce it (−3 if profit < 0)
+  // Brand equity update: R&D builds equity, marketing builds equity, losses reduce it
+  const rndScale = rndParam ? rndParam.scale : 100_000
+  const mktScale = marketingParam ? marketingParam.scale : 100_000
   const equityChange =
-    (decisions.rnd / 100000) * 2 +
-    (decisions.marketing / 100000) * 1 -
+    ((decisions.rnd ?? 0) / rndScale) * 2 +
+    ((decisions.marketing ?? 0) / mktScale) * 1 -
     (profit < 0 ? 3 : 0)
   const brandEquityAfter = Math.max(0, Math.min(100, state.brandEquity + equityChange))
 
-  // Customer satisfaction: quality (R&D) vs price, stockout penalty, baseline drift
-  const priceVsQuality = decisions.rnd / 10000 - decisions.price / 10
+  // Customer satisfaction
+  const priceVsQuality =
+    (decisions.rnd ?? 0) / (rndParam?.scale ?? 100_000) -
+    (price / (priceParam?.scale ?? 500))
   const stockoutPenalty = stockout > 0 ? -10 : 0
   const csatChange = priceVsQuality * 0.3 + stockoutPenalty + 2
   const csatAfter = Math.max(0, Math.min(100, state.customerSatisfaction + csatChange))
 
   const cashAfter = state.cash + profit
 
-  // Generate a one-line news headline
+  // Headline
   const headline = buildHeadline({
     quarter,
     profit,
@@ -195,6 +159,7 @@ export function runQuarter(state: GameState, decisions: Decisions): QuarterResul
     prevShare: state.history.length > 0 ? state.history[state.history.length - 1].marketShare : 0,
     stockout,
     cashAfter,
+    profitLabel: config.profitLabel,
   })
 
   return {
@@ -204,7 +169,7 @@ export function runQuarter(state: GameState, decisions: Decisions): QuarterResul
     unitsSold,
     revenue,
     costs: {
-      production: productionCost,
+      variable: variableCost,
       marketing: marketingCost,
       rnd: rndCost,
       fixed: fixedCost,
@@ -227,39 +192,28 @@ function buildHeadline(args: {
   prevShare: number
   stockout: number
   cashAfter: number
+  profitLabel: string
 }): string {
   const shareDelta = args.studentShare - args.prevShare
-  const profitStr = `₹${(Math.abs(args.profit) / 100000).toFixed(1)}L ${args.profit >= 0 ? "profit" : "loss"}`
+  const profitStr = `${formatINR(Math.abs(args.profit))} ${args.profit >= 0 ? "surplus" : "loss"}`
 
   if (args.cashAfter < 0) {
-    return `Q${args.quarter}: BANKRUPT — cash went negative. ${profitStr}.`
+    return `Q${args.quarter}: BANKRUPT — budget went negative. ${profitStr}.`
   }
   if (args.stockout > 0) {
-    return `Q${args.quarter}: ${profitStr}. Lost ${args.stockout.toLocaleString()} units to stockout.`
+    return `Q${args.quarter}: ${profitStr}. Lost ${args.stockout.toLocaleString()} demand to undersupply.`
   }
   if (shareDelta > 2) {
-    return `Q${args.quarter}: ${profitStr}. Gained ${shareDelta.toFixed(1)}pp market share.`
+    return `Q${args.quarter}: ${profitStr}. Gained ${shareDelta.toFixed(1)}pp ${"share"}.`
   }
   if (shareDelta < -2) {
-    return `Q${args.quarter}: ${profitStr}. Lost ${Math.abs(shareDelta).toFixed(1)}pp market share.`
+    return `Q${args.quarter}: ${profitStr}. Lost ${Math.abs(shareDelta).toFixed(1)}pp share.`
   }
-  return `Q${args.quarter}: ${profitStr}. Market share held at ${args.studentShare.toFixed(1)}%.`
+  return `Q${args.quarter}: ${profitStr}. Share held at ${args.studentShare.toFixed(1)}%.`
 }
 
-// ---- Final grade ----
-
-export type FinalGrade = {
-  grade: "A" | "B" | "C" | "D"
-  summary: string
-  metrics: {
-    cash: number
-    brandEquity: number
-    avgMarketShare: number
-    totalProfit: number
-  }
-}
-
-export function computeFinalGrade(state: GameState): FinalGrade {
+// ─── Final grade (config-driven) ───
+export function computeFinalGrade(state: GameState, config: SimulationConfig): FinalGrade {
   const cash = state.cash
   const be = state.brandEquity
   const avgShare =
@@ -269,35 +223,38 @@ export function computeFinalGrade(state: GameState): FinalGrade {
   const totalProfit = state.history.reduce((s, q) => s + q.profit, 0)
   const metrics = { cash, brandEquity: be, avgMarketShare: avgShare, totalProfit }
 
-  if (cash >= 10_000_000 && be >= 75 && avgShare >= 25)
-    return { grade: "A", summary: "Excellent — strong cash, brand equity, and market share.", metrics }
-  if (cash >= 5_000_000 && be >= 60 && avgShare >= 15)
-    return { grade: "B", summary: "Good — solid business fundamentals across the board.", metrics }
-  if (cash >= 0 && be >= 45)
-    return { grade: "C", summary: "Acceptable — survived 8 quarters but room to improve.", metrics }
+  const t = config.gradeThresholds
+  if (cash >= t.A.cash && be >= t.A.equity && avgShare >= t.A.share)
+    return { grade: "A", summary: "Excellent — strong performance across all metrics.", metrics }
+  if (cash >= t.B.cash && be >= t.B.equity && avgShare >= t.B.share)
+    return { grade: "B", summary: "Good — solid fundamentals with room to grow.", metrics }
+  if (cash >= t.C.cash && be >= t.C.equity)
+    return { grade: "C", summary: "Acceptable — survived but needs improvement.", metrics }
   if (cash < 0)
-    return { grade: "D", summary: "Bankrupt — ran out of cash before finishing.", metrics }
-  return { grade: "D", summary: "Below acceptable thresholds on brand equity or cash.", metrics }
+    return { grade: "D", summary: "Bankrupt — ran out of budget before finishing.", metrics }
+  return { grade: "D", summary: "Below acceptable thresholds.", metrics }
 }
 
-// ---- Helpers ----
-
+// ─── Helpers ───
 export function formatINR(n: number): string {
   const abs = Math.abs(n)
   const sign = n < 0 ? "−" : ""
-  if (abs >= 10_000_000) return `${sign}₹${(abs / 10_000_000).toFixed(2)}Cr`
-  if (abs >= 100_000) return `${sign}₹${(abs / 100_000).toFixed(1)}L`
-  if (abs >= 1000) return `${sign}₹${(abs / 1000).toFixed(1)}K`
-  return `${sign}₹${abs.toFixed(0)}`
+  if (abs >= 10_000_000) return `${sign}Rs.${(abs / 10_000_000).toFixed(2)}Cr`
+  if (abs >= 100_000) return `${sign}Rs.${(abs / 100_000).toFixed(1)}L`
+  if (abs >= 1000) return `${sign}Rs.${(abs / 1000).toFixed(1)}K`
+  return `${sign}Rs.${abs.toFixed(0)}`
 }
 
-export function initialState(): GameState {
+export function initialState(config: SimulationConfig): GameState {
   return {
     status: "intro",
     currentQuarter: 1,
-    cash: STARTING_CASH,
-    brandEquity: STARTING_BRAND_EQUITY,
-    customerSatisfaction: STARTING_CSAT,
+    cash: config.startingCash,
+    brandEquity: config.startingBrandEquity,
+    customerSatisfaction: config.startingCsat,
     history: [],
   }
 }
+
+// Re-export for backwards compat
+export const SIM_TOTAL_QUARTERS = 8
