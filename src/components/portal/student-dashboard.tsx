@@ -34,6 +34,7 @@ import { WeeklyTasksPanel } from "./weekly-tasks-panel"
 import { TestPapersPanel } from "./test-papers-panel"
 import { SimulationGamePanel } from "./simulation-game-panel"
 import { LeaderboardPanel } from "./leaderboard-panel"
+import { LecturesPanel } from "./lectures-panel"
 import { useWeeklyProgress } from "./use-weekly-progress"
 import { useTestProgressHelpers, useMounted } from "./use-test-progress"
 import { useSimulation } from "./simulation-store"
@@ -218,9 +219,10 @@ export function StudentDashboard() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="weekly">Weekly Tasks</TabsTrigger>
+            <TabsTrigger value="lectures">Lectures</TabsTrigger>
             <TabsTrigger value="tests">Test Papers</TabsTrigger>
             <TabsTrigger value="simulation">Simulation</TabsTrigger>
             <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
@@ -527,6 +529,10 @@ export function StudentDashboard() {
 
           <TabsContent value="weekly" className="mt-6">
             <WeeklyTasksPanel />
+          </TabsContent>
+
+          <TabsContent value="lectures" className="mt-6">
+            <LecturesPanel />
           </TabsContent>
 
           <TabsContent value="tests" className="mt-6">
