@@ -18,6 +18,13 @@ export type Session = {
   email: string
   phone?: string
   stream?: string
+  // Academic + guardian fields (added for result mailing + profile)
+  guardianEmail?: string // parent/teacher/HOD who receives internship results
+  guardianRole?: string // "Parent" | "Teacher" | "HOD" | "Mentor"
+  qualification?: string // "MBA", "BBA", "BSc", etc.
+  year?: string // "1st Year", "2nd Year", "Final Year", "Semester 5", etc.
+  college?: string
+  city?: string
   picture?: string | null
   loggedInAt: number | null
   registrationStatus: RegistrationStatus
@@ -33,7 +40,18 @@ type AuthState = Session & {
   loginAsGoogle: (name: string, email: string, picture?: string | null) => void
   loginAsStudent: (name: string, email: string, stream?: string) => void
   /** Step 1 of the paid registration flow — student fills the form */
-  registerStudent: (name: string, email: string, phone: string, stream: string) => void
+  registerStudent: (input: {
+    name: string
+    email: string
+    phone: string
+    stream: string
+    guardianEmail?: string
+    guardianRole?: string
+    qualification?: string
+    year?: string
+    college?: string
+    city?: string
+  }) => void
   /** Step 2 — student pays ₹1499, transitions to 'paid' status */
   markPaid: (paymentId: string) => void
   /** Step 3 — admin approves, internship starts */
@@ -165,13 +183,19 @@ export const useAuth = create<AuthState>()(
           approvedAt: Date.now(),
         }),
 
-      registerStudent: (name, email, phone, stream) =>
+      registerStudent: (input) =>
         set({
           role: "student",
-          name: name || "Student",
-          email: email || "student@college.edu",
-          phone,
-          stream,
+          name: input.name || "Student",
+          email: input.email || "student@college.edu",
+          phone: input.phone,
+          stream: input.stream,
+          guardianEmail: input.guardianEmail,
+          guardianRole: input.guardianRole,
+          qualification: input.qualification,
+          year: input.year,
+          college: input.college,
+          city: input.city,
           picture: null,
           loggedInAt: Date.now(),
           registrationStatus: "registered",
@@ -214,6 +238,12 @@ export const useAuth = create<AuthState>()(
           email: "",
           phone: undefined,
           stream: undefined,
+          guardianEmail: undefined,
+          guardianRole: undefined,
+          qualification: undefined,
+          year: undefined,
+          college: undefined,
+          city: undefined,
           picture: null,
           loggedInAt: null,
           registrationStatus: "none",
@@ -231,6 +261,12 @@ export const useAuth = create<AuthState>()(
         email: s.email,
         phone: s.phone,
         stream: s.stream,
+        guardianEmail: s.guardianEmail,
+        guardianRole: s.guardianRole,
+        qualification: s.qualification,
+        year: s.year,
+        college: s.college,
+        city: s.city,
         picture: s.picture,
         loggedInAt: s.loggedInAt,
         registrationStatus: s.registrationStatus,

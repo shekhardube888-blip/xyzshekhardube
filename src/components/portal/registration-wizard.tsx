@@ -47,6 +47,9 @@ const STREAMS = [
 
 type Step = "details" | "payment" | "confirmation"
 
+const GUARDIAN_ROLES = ["Parent", "Teacher", "HOD", "Mentor", "Guardian"]
+const YEARS = ["1st Year", "2nd Year", "3rd Year", "4th Year / Final", "Semester 1", "Semester 2", "Semester 3", "Semester 4", "Semester 5", "Semester 6", "Semester 7", "Semester 8"]
+
 export function RegistrationWizard() {
   const { toast } = useToast()
   const { registerStudent, markPaid, name, email, phone, stream } = useAuth()
@@ -60,13 +63,19 @@ export function RegistrationWizard() {
   const [formEmail, setFormEmail] = useState(email && email !== "guest@agileportal.in" ? email : "")
   const [formPhone, setFormPhone] = useState(phone ?? "")
   const [formStream, setFormStream] = useState(stream ?? "")
+  const [formGuardianEmail, setFormGuardianEmail] = useState("")
+  const [formGuardianRole, setFormGuardianRole] = useState("Parent")
+  const [formQualification, setFormQualification] = useState("")
+  const [formYear, setFormYear] = useState("")
+  const [formCollege, setFormCollege] = useState("")
+  const [formCity, setFormCity] = useState("")
   const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(null)
 
   const handleDetailsSubmit = () => {
-    if (!formName || !formEmail || !formPhone || !formStream) {
+    if (!formName || !formEmail || !formPhone || !formStream || !formCollege || !formCity || !formQualification || !formYear) {
       toast({
-        title: "Please fill all fields",
-        description: "Name, email, phone, and degree stream are all required.",
+        title: "Please fill all required fields",
+        description: "Name, email, phone, stream, qualification, year, college, and city are required.",
       })
       return
     }
@@ -78,7 +87,22 @@ export function RegistrationWizard() {
       toast({ title: "Invalid phone", description: "Enter a 10-digit phone number.", variant: "destructive" })
       return
     }
-    registerStudent(formName, formEmail, formPhone, formStream)
+    if (formGuardianEmail && !formGuardianEmail.includes("@")) {
+      toast({ title: "Invalid guardian email", description: "Enter a valid email or leave blank.", variant: "destructive" })
+      return
+    }
+    registerStudent({
+      name: formName,
+      email: formEmail,
+      phone: formPhone,
+      stream: formStream,
+      guardianEmail: formGuardianEmail || undefined,
+      guardianRole: formGuardianRole || undefined,
+      qualification: formQualification,
+      year: formYear,
+      college: formCollege,
+      city: formCity,
+    })
     setStep("payment")
   }
 
@@ -92,7 +116,7 @@ export function RegistrationWizard() {
       stream: formStream,
       type: "registration",
       stage: "Paid registration — ₹" + REGISTRATION_FEE + " fee",
-      detail: `Paid ₹${REGISTRATION_FEE} via ${result.method}. Phone: ${formPhone}. Stream: ${formStream}. Awaiting admin approval to start internship.`,
+      detail: `Paid ₹${REGISTRATION_FEE} via ${result.method}. Phone: ${formPhone}. Qualification: ${formQualification}, Year: ${formYear}, College: ${formCollege}, City: ${formCity}. Guardian (${formGuardianRole}): ${formGuardianEmail || "not provided"}. Results will be emailed to guardian on completion.`,
     })
     setStep("confirmation")
   }
@@ -120,7 +144,7 @@ export function RegistrationWizard() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="space-y-1.5">
-              <Label htmlFor="reg-name" className="text-xs">Full name</Label>
+              <Label htmlFor="reg-name" className="text-xs">Full name *</Label>
               <Input
                 id="reg-name"
                 placeholder="e.g. Ananya Iyer"
@@ -129,7 +153,7 @@ export function RegistrationWizard() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="reg-email" className="text-xs">Email</Label>
+              <Label htmlFor="reg-email" className="text-xs">Email *</Label>
               <Input
                 id="reg-email"
                 type="email"
@@ -139,7 +163,7 @@ export function RegistrationWizard() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="reg-phone" className="text-xs">Phone (10 digits)</Label>
+              <Label htmlFor="reg-phone" className="text-xs">Phone (10 digits) *</Label>
               <Input
                 id="reg-phone"
                 type="tel"
@@ -150,7 +174,7 @@ export function RegistrationWizard() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Degree stream</Label>
+              <Label className="text-xs">Degree stream *</Label>
               <Select value={formStream} onValueChange={setFormStream}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select your stream" />
@@ -161,6 +185,96 @@ export function RegistrationWizard() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Academic details */}
+            <div className="rounded-lg border bg-muted/30 p-3 space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Academic Details</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="reg-qualification" className="text-xs">Qualification *</Label>
+                  <Select value={formQualification} onValueChange={setFormQualification}>
+                    <SelectTrigger id="reg-qualification">
+                      <SelectValue placeholder="MBA / BBA / BSc" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="MBA">MBA</SelectItem>
+                      <SelectItem value="BBA">BBA</SelectItem>
+                      <SelectItem value="BSc">BSc</SelectItem>
+                      <SelectItem value="MCA">MCA</SelectItem>
+                      <SelectItem value="MSc">MSc</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="reg-year" className="text-xs">Year / Semester *</Label>
+                  <Select value={formYear} onValueChange={setFormYear}>
+                    <SelectTrigger id="reg-year">
+                      <SelectValue placeholder="Select year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {YEARS.map((y) => (
+                        <SelectItem key={y} value={y}>{y}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="reg-college" className="text-xs">College name *</Label>
+                <Input
+                  id="reg-college"
+                  placeholder="e.g. IIM Bangalore"
+                  value={formCollege}
+                  onChange={(e) => setFormCollege(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="reg-city" className="text-xs">City *</Label>
+                <Input
+                  id="reg-city"
+                  placeholder="e.g. Bangalore"
+                  value={formCity}
+                  onChange={(e) => setFormCity(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Guardian / Teacher / HOD */}
+            <div className="rounded-lg border border-violet-200 bg-violet-50/30 p-3 space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">
+                Guardian / Teacher / HOD (results will be emailed)
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="reg-grd-role" className="text-xs">Relationship</Label>
+                  <Select value={formGuardianRole} onValueChange={setFormGuardianRole}>
+                    <SelectTrigger id="reg-grd-role">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {GUARDIAN_ROLES.map((r) => (
+                        <SelectItem key={r} value={r}>{r}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="reg-grd-email" className="text-xs">Email (optional)</Label>
+                  <Input
+                    id="reg-grd-email"
+                    type="email"
+                    placeholder="hod@college.edu"
+                    value={formGuardianEmail}
+                    onChange={(e) => setFormGuardianEmail(e.target.value)}
+                  />
+                </div>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                When your internship completes, your final results + certificate will be
+                automatically emailed to this address.
+              </p>
             </div>
           </CardContent>
           <CardFooter className="flex-col gap-2 border-t bg-muted/30 p-4">

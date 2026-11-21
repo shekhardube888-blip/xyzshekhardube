@@ -135,7 +135,7 @@ const deliverableStatus = {
 }
 
 export function StudentDashboard() {
-  const { name, email, stream } = useAuth()
+  const { name, email, stream, college, city, year, qualification, guardianEmail, guardianRole } = useAuth()
   const { toast } = useToast()
   const [deliverableTitle, setDeliverableTitle] = useState("")
   const [deliverableUrl, setDeliverableUrl] = useState("")
@@ -183,8 +183,13 @@ export function StudentDashboard() {
               Hi {name?.split(" ")[0]}, here&apos;s your progress
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              {PROGRAM.title} · {PROGRAM.cohort} · {stream && `${stream} · `}
-              {email}
+              {PROGRAM.title} · {PROGRAM.cohort}
+              {stream && ` · ${stream}`}
+              {qualification && ` · ${qualification}`}
+              {year && ` · ${year}`}
+              {college && ` · ${college}`}
+              {city && ` · ${city}`}
+              {guardianEmail && ` · ${guardianRole || "Guardian"}: ${guardianEmail}`}
             </p>
           </div>
           <Badge className="border-emerald-300 bg-emerald-100 text-emerald-800">
