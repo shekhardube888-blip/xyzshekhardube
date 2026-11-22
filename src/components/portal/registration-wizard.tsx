@@ -110,7 +110,63 @@ export function RegistrationWizard() {
       college: formCollege,
       city: formCity,
     })
-    setStep("category")
+
+    // Auto-select category based on the student's stream
+    const streamLower = formStream.toLowerCase()
+    let autoCategory = "MBA / Management"
+    let autoSubcategory = "Marketing & Brand Strategy"
+    if (streamLower.includes("bba") && streamLower.includes("digital")) {
+      autoCategory = "BBA / Business"
+      autoSubcategory = "Digital Marketing"
+    } else if (streamLower.includes("bba") && streamLower.includes("entrepreneur")) {
+      autoCategory = "BBA / Business"
+      autoSubcategory = "Entrepreneurship & Startup"
+    } else if (streamLower.includes("computer science") || streamLower.includes("data science")) {
+      autoCategory = "BSc Computer Science"
+      autoSubcategory = "Data Science & Analytics"
+    } else if (streamLower.includes("biotech")) {
+      autoCategory = "BSc Biotechnology"
+      autoSubcategory = "Bioinformatics"
+    } else if (streamLower.includes("statistic")) {
+      autoCategory = "BSc Statistics / Maths"
+      autoSubcategory = "Actuarial & Risk"
+    } else if (streamLower.includes("mba") && streamLower.includes("finance")) {
+      autoSubcategory = "Finance & Valuation"
+    } else if (streamLower.includes("mba") && streamLower.includes("operation")) {
+      autoSubcategory = "Operations & Supply Chain"
+    }
+
+    // Create enrollment with auto-selected category
+    const cat = CATEGORIES.find((c) => c.title === autoCategory)
+    const track = cat?.title.includes("MBA") ? "MBA" : cat?.title.includes("BBA") ? "BBA" : "BSc"
+    createEnrollment({
+      studentEmail: formEmail,
+      category: autoCategory,
+      subcategory: autoSubcategory,
+      track: track ?? "MBA",
+      startDate: Date.now(),
+    })
+
+    // Create approval request for admin (so admin can track + approve)
+    createApproval({
+      studentName: formName,
+      studentEmail: formEmail,
+      stream: formStream,
+      type: "registration",
+      stage: "New student registration — tracking started",
+      detail: `Phone: ${formPhone}. Qualification: ${formQualification}, Year: ${formYear}, College: ${formCollege}, City: ${formCity}. Auto-enrolled in: ${autoCategory} → ${autoSubcategory}. Guardian (${formGuardianRole}): ${formGuardianEmail || "not provided"}. Dashboard opened immediately — student can start tracking.`,
+    })
+
+    // Mark as approved so dashboard opens immediately
+    useAuth.getState().markApproved()
+
+    toast({
+      title: `Welcome aboard, ${formName.split(" ")[0]}! 🎉`,
+      description: `Your internship in ${autoCategory} → ${autoSubcategory} has started. Opening your dashboard…`,
+    })
+
+    // Open the student dashboard immediately
+    goToDashboard()
   }
 
   const handleCategorySubmit = () => {
@@ -180,8 +236,8 @@ export function RegistrationWizard() {
           <CardHeader>
             <CardTitle className="text-lg">Register for your internship</CardTitle>
             <CardDescription>
-              Fill in your details to get started. After payment of ₹{REGISTRATION_FEE}, admin will
-              approve your registration and your internship starts.
+              Fill in your details and start tracking your internship immediately.
+              Your dashboard opens right after — no waiting.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -324,7 +380,7 @@ export function RegistrationWizard() {
               className="w-full bg-emerald-600 hover:bg-emerald-700"
               onClick={handleDetailsSubmit}
             >
-              Continue to payment
+              Start my internship
               <ArrowRight className="ml-1.5 h-4 w-4" />
             </Button>
             <Button variant="ghost" size="sm" onClick={goToMarketing} className="w-full">
