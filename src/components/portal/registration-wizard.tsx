@@ -48,7 +48,7 @@ const STREAMS = [
   "BSc · Biotechnology",
 ]
 
-type Step = "details" | "category" | "payment" | "confirmation"
+type Step = "details" | "category" | "schedule" | "payment" | "confirmation"
 
 const GUARDIAN_ROLES = ["Parent", "Teacher", "HOD", "Mentor", "Guardian"]
 const YEARS = ["1st Year", "2nd Year", "3rd Year", "4th Year / Final", "Semester 1", "Semester 2", "Semester 3", "Semester 4", "Semester 5", "Semester 6", "Semester 7", "Semester 8"]
@@ -74,6 +74,7 @@ export function RegistrationWizard() {
   const [formCity, setFormCity] = useState("")
   const [formCategory, setFormCategory] = useState("")
   const [formSubcategory, setFormSubcategory] = useState("")
+  const [formStartDate, setFormStartDate] = useState("")
   const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(null)
   const createEnrollment = useEnrollmentStore((s) => s.createEnrollment)
 
@@ -117,6 +118,18 @@ export function RegistrationWizard() {
       toast({ title: "Select category + subcategory", variant: "destructive" })
       return
     }
+    // Default start date to tomorrow
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    setFormStartDate(tomorrow.toISOString().split("T")[0])
+    setStep("schedule")
+  }
+
+  const handleScheduleSubmit = () => {
+    if (!formStartDate) {
+      toast({ title: "Select a start date", variant: "destructive" })
+      return
+    }
     setStep("payment")
   }
 
@@ -124,15 +137,16 @@ export function RegistrationWizard() {
     setPaymentResult(result)
     markPaid(result.paymentId)
     // Auto-create an approval request for the admin
+    const startDateStr = formStartDate ? new Date(formStartDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "TBD"
     createApproval({
       studentName: formName,
       studentEmail: formEmail,
       stream: formStream,
       type: "registration",
       stage: "Paid registration — ₹" + REGISTRATION_FEE + " fee",
-      detail: `Paid ₹${REGISTRATION_FEE} via ${result.method}. Phone: ${formPhone}. Qualification: ${formQualification}, Year: ${formYear}, College: ${formCollege}, City: ${formCity}. Category: ${formCategory} → ${formSubcategory}. Guardian (${formGuardianRole}): ${formGuardianEmail || "not provided"}. Results will be emailed to guardian on completion.`,
+      detail: `Paid ₹${REGISTRATION_FEE} via ${result.method}. Phone: ${formPhone}. Qualification: ${formQualification}, Year: ${formYear}, College: ${formCollege}, City: ${formCity}. Category: ${formCategory} → ${formSubcategory}. Start date: ${startDateStr}. Guardian (${formGuardianRole}): ${formGuardianEmail || "not provided"}. Results will be emailed to guardian on completion.`,
     })
-    // Create the enrollment
+    // Create the enrollment with start date
     const cat = CATEGORIES.find((c) => c.title === formCategory)
     const track = cat?.title.includes("MBA") ? "MBA" : cat?.title.includes("BBA") ? "BBA" : "BSc"
     createEnrollment({
@@ -140,21 +154,24 @@ export function RegistrationWizard() {
       category: formCategory,
       subcategory: formSubcategory,
       track: track ?? "MBA",
+      startDate: formStartDate ? new Date(formStartDate).getTime() : undefined,
     })
     setStep("confirmation")
   }
 
   return (
     <div className="space-y-4">
-      {/* Progress indicator — 4 steps */}
+      {/* Progress indicator — 5 steps */}
       <div className="flex items-center justify-center gap-2">
         <StepDot active={step === "details"} done={step !== "details"} label="1" icon={User} />
         <div className={`h-0.5 w-8 ${step !== "details" ? "bg-emerald-500" : "bg-border"}`} />
-        <StepDot active={step === "category"} done={step === "payment" || step === "confirmation"} label="2" icon={BookOpen} />
+        <StepDot active={step === "category"} done={step === "schedule" || step === "payment" || step === "confirmation"} label="2" icon={BookOpen} />
+        <div className={`h-0.5 w-8 ${step === "schedule" || step === "payment" || step === "confirmation" ? "bg-emerald-500" : "bg-border"}`} />
+        <StepDot active={step === "schedule"} done={step === "payment" || step === "confirmation"} label="3" icon={Clock} />
         <div className={`h-0.5 w-8 ${step === "payment" || step === "confirmation" ? "bg-emerald-500" : "bg-border"}`} />
-        <StepDot active={step === "payment"} done={step === "confirmation"} label="3" icon={CreditCard} />
+        <StepDot active={step === "payment"} done={step === "confirmation"} label="4" icon={CreditCard} />
         <div className={`h-0.5 w-8 ${step === "confirmation" ? "bg-emerald-500" : "bg-border"}`} />
-        <StepDot active={step === "confirmation"} done={false} label="4" icon={CheckCircle2} />
+        <StepDot active={step === "confirmation"} done={false} label="5" icon={CheckCircle2} />
       </div>
 
       {/* Step 1: Details */}
@@ -397,7 +414,84 @@ export function RegistrationWizard() {
         </Card>
       )}
 
-      {/* Step 3: Payment */}
+      {/* Step 3: Schedule */}
+      {step === "schedule" && (
+        <Card className="shadow-md">
+          <CardHeader>
+            <CardTitle className="text-lg">Schedule your internship</CardTitle>
+            <CardDescription>
+              Pick a start date for your {formCategory} → {formSubcategory} internship.
+              The 8-week program runs from your selected start date.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Summary of selected category */}
+            <div className="rounded-lg border bg-muted/40 p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Selected track</p>
+              <p className="mt-1 text-sm font-medium text-foreground">{formCategory} → {formSubcategory}</p>
+            </div>
+
+            {/* Date picker */}
+            <div className="space-y-1.5">
+              <Label htmlFor="reg-start-date" className="text-xs">Internship start date *</Label>
+              <Input
+                id="reg-start-date"
+                type="date"
+                value={formStartDate}
+                onChange={(e) => setFormStartDate(e.target.value)}
+                min={new Date().toISOString().split("T")[0]}
+              />
+              <p className="text-[11px] text-muted-foreground">
+                The internship starts on this date. Weekly tasks unlock sequentially —
+                Week 1 on the start date, Week 2 after 7 days, etc.
+              </p>
+            </div>
+
+            {/* Schedule preview */}
+            {formStartDate && (
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50/30 p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Schedule preview</p>
+                <dl className="mt-2 space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Start date</dt>
+                    <dd className="font-medium">{new Date(formStartDate).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Duration</dt>
+                    <dd className="font-medium">8 weeks</dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">End date (approx)</dt>
+                    <dd className="font-medium">
+                      {new Date(new Date(formStartDate).getTime() + 56 * 24 * 60 * 60 * 1000).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
+                    </dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Weekly commitment</dt>
+                    <dd className="font-medium">~90-180 min/week</dd>
+                  </div>
+                </dl>
+              </div>
+            )}
+          </CardContent>
+          <CardFooter className="flex-col gap-2 border-t bg-muted/30 p-4">
+            <Button
+              className="w-full bg-emerald-600 hover:bg-emerald-700"
+              onClick={handleScheduleSubmit}
+              disabled={!formStartDate}
+            >
+              Continue to payment
+              <ArrowRight className="ml-1.5 h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setStep("category")} className="w-full">
+              <ArrowLeft className="mr-1 h-3.5 w-3.5" />
+              Back to category
+            </Button>
+          </CardFooter>
+        </Card>
+      )}
+
+      {/* Step 4: Payment */}
       {step === "payment" && (
         <div className="space-y-4">
           <PaymentGateway onPaid={handlePaid} />
