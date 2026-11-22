@@ -252,6 +252,7 @@ export const useOrgStore = create<OrgState>()(
     }),
     {
       name: "agileportal-org-store",
+      skipHydration: true,
     },
   ),
 )

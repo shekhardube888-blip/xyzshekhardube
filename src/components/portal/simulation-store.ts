@@ -66,6 +66,7 @@ export const useSimulation = create<SimStore>()(
     }),
     {
       name: "agileportal-simulation",
+      skipHydration: true,
       partialize: (s) => ({
         status: s.status,
         currentQuarter: s.currentQuarter,

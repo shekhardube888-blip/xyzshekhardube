@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { NextAuthProvider, AuthSync } from "@/components/portal/session-provider";
 import { MentorChatWidget } from "@/components/portal/mentor-chat-widget";
+import { StoreRehydrator } from "@/components/portal/store-rehydrator";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -57,6 +58,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
         <NextAuthProvider>
+          <StoreRehydrator />
           {children}
           <AuthSync />
           <MentorChatWidget />

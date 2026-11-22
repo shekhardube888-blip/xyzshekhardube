@@ -54,6 +54,7 @@ export const useLeaderboard = create<LeaderboardState>()(
     }),
     {
       name: "agileportal-leaderboard",
+      skipHydration: true,
       partialize: (s) => ({
         entries: s.entries,
         lastUserEntryId: s.lastUserEntryId,

@@ -180,6 +180,7 @@ export const useApprovalStore = create<ApprovalState>()(
     }),
     {
       name: "agileportal-approvals",
+      skipHydration: true,
       partialize: (s) => ({ requests: s.requests }),
     },
   ),

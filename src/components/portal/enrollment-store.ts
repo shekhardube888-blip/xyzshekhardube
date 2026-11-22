@@ -126,6 +126,7 @@ export const useEnrollmentStore = create<EnrollmentState>()(
     }),
     {
       name: "agileportal-enrollments",
+      skipHydration: true,
       partialize: (s) => ({
         enrollments: s.enrollments,
         activeEnrollmentId: s.activeEnrollmentId,

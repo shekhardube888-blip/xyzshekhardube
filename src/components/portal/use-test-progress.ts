@@ -42,6 +42,7 @@ export const useTestProgress = create<TestProgressState>()(
     }),
     {
       name: STORAGE_KEY,
+      skipHydration: true,
       partialize: (s) => ({ progress: s.progress }),
     },
   ),

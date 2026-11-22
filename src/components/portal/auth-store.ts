@@ -254,6 +254,7 @@ export const useAuth = create<AuthState>()(
     }),
     {
       name: "agileportal-auth",
+      skipHydration: true,
       // Only persist these fields
       partialize: (s) => ({
         role: s.role,
