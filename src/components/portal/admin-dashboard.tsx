@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table"
 import { ApprovalQueuePanel } from "./approval-queue-panel"
 import { CertificatePanel } from "./certificate-panel"
+import { StudentProgressPanel } from "./student-progress-panel"
 import {
   CheckCircle2,
   XCircle,
@@ -225,6 +226,9 @@ export function AdminDashboard() {
 
       {/* Certificate panel — admin can print certificates for completed students */}
       <CertificatePanel />
+
+      {/* Student progress dashboard — all students' progress graphs + reports */}
+      <StudentProgressPanel />
     </section>
   )
 }
