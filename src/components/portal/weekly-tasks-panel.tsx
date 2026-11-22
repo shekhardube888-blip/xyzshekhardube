@@ -23,12 +23,13 @@ import {
   ListChecks,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { WEEKS, PASS_THRESHOLD, type Week } from "./portal-weeks"
+import { WEEKS, PASS_THRESHOLD, getWeeksForCategory, type Week } from "./portal-weeks"
 import { useWeeklyProgress } from "./use-weekly-progress"
 import { AIGuidancePanel } from "./ai-guidance-panel"
 import { AISolutionFeedback } from "./ai-solution-feedback"
 import { useApprovalStore } from "./approval-store"
 import { useAuth } from "./auth-store"
+import { useEnrollmentStore } from "./enrollment-store"
 
 const QUESTIONS_PER_WEEK = 4
 
@@ -36,6 +37,13 @@ export function WeeklyTasksPanel() {
   const { toast } = useToast()
   const createApproval = useApprovalStore((s) => s.createRequest)
   const auth = useAuth()
+  const { email } = auth
+  const activeEnrollment = email ? useEnrollmentStore.getState().getActiveEnrollment(email) : null
+  // Use category-specific weeks based on the active enrollment
+  const WEEKS_FOR_CATEGORY = getWeeksForCategory(
+    activeEnrollment?.category ?? auth.stream ?? "MBA",
+    activeEnrollment?.subcategory,
+  )
   const [activeWeekId, setActiveWeekId] = useState(1)
   const { mounted, getWeek, setAnswer, submitTest, submitSolution, completedWeeks } =
     useWeeklyProgress(QUESTIONS_PER_WEEK)
@@ -49,11 +57,11 @@ export function WeeklyTasksPanel() {
   }
 
   const activeWeek = useMemo(
-    () => WEEKS.find((w) => w.id === activeWeekId) ?? WEEKS[0],
-    [activeWeekId],
+    () => WEEKS_FOR_CATEGORY.find((w) => w.id === activeWeekId) ?? WEEKS_FOR_CATEGORY[0],
+    [activeWeekId, WEEKS_FOR_CATEGORY],
   )
 
-  const totalProgress = Math.round((completedWeeks / WEEKS.length) * 100)
+  const totalProgress = Math.round((completedWeeks / WEEKS_FOR_CATEGORY.length) * 100)
 
   const handleQuizSubmit = (week: Week) => {
     const correctIndexes = week.quiz.map((q) => q.correctIndex)
@@ -87,7 +95,7 @@ export function WeeklyTasksPanel() {
     toast({
       title: `Week ${week.id} solution submitted!`,
       description:
-        nextWeek <= WEEKS.length
+        nextWeek <= WEEKS_FOR_CATEGORY.length
           ? `Your market scenario solution is in review. Week ${nextWeek} is now unlocked — start the next task!`
           : `Capstone complete! Your final submission is in review.`,
     })
@@ -108,7 +116,7 @@ export function WeeklyTasksPanel() {
             <p className="mt-1 text-sm text-muted-foreground">
               Each week unlocks after you pass the previous week&apos;s test AND submit your
               market scenario solution. Pass the test (≥ {PASS_THRESHOLD}/4 correct) and submit
-              a {WEEKS[0].minWords}–{WEEKS[WEEKS.length - 1].maxWords} word solution to advance.
+              a {WEEKS_FOR_CATEGORY[0].minWords}–{WEEKS_FOR_CATEGORY[WEEKS_FOR_CATEGORY.length - 1].maxWords} word solution to advance.
             </p>
           </div>
           <Badge
@@ -116,7 +124,7 @@ export function WeeklyTasksPanel() {
             variant="outline"
           >
             <Trophy className="mr-1 h-3 w-3" />
-            {completedWeeks}/{WEEKS.length} weeks complete
+            {completedWeeks}/{WEEKS_FOR_CATEGORY.length} weeks complete
           </Badge>
         </div>
 
@@ -131,7 +139,7 @@ export function WeeklyTasksPanel() {
 
         {/* Week selector */}
         <div className="mt-6 grid grid-cols-4 gap-2 sm:grid-cols-8">
-          {WEEKS.map((w) => {
+          {WEEKS_FOR_CATEGORY.map((w) => {
             const unlocked = mounted ? isUnlocked(w.id) : false
             const wp = mounted ? getWeek(w.id) : null
             const weekComplete = wp?.passed && wp.solution.submittedAt !== null
