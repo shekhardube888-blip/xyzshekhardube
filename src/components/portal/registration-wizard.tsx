@@ -13,6 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { CATEGORIES } from "./portal-data"
+import { useEnrollmentStore } from "./enrollment-store"
 import {
   User,
   CreditCard,
@@ -23,6 +25,7 @@ import {
   ShieldCheck,
   Clock,
   Receipt,
+  BookOpen,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "./auth-store"
@@ -45,7 +48,7 @@ const STREAMS = [
   "BSc · Biotechnology",
 ]
 
-type Step = "details" | "payment" | "confirmation"
+type Step = "details" | "category" | "payment" | "confirmation"
 
 const GUARDIAN_ROLES = ["Parent", "Teacher", "HOD", "Mentor", "Guardian"]
 const YEARS = ["1st Year", "2nd Year", "3rd Year", "4th Year / Final", "Semester 1", "Semester 2", "Semester 3", "Semester 4", "Semester 5", "Semester 6", "Semester 7", "Semester 8"]
@@ -69,7 +72,10 @@ export function RegistrationWizard() {
   const [formYear, setFormYear] = useState("")
   const [formCollege, setFormCollege] = useState("")
   const [formCity, setFormCity] = useState("")
+  const [formCategory, setFormCategory] = useState("")
+  const [formSubcategory, setFormSubcategory] = useState("")
   const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(null)
+  const createEnrollment = useEnrollmentStore((s) => s.createEnrollment)
 
   const handleDetailsSubmit = () => {
     if (!formName || !formEmail || !formPhone || !formStream || !formCollege || !formCity || !formQualification || !formYear) {
@@ -103,6 +109,14 @@ export function RegistrationWizard() {
       college: formCollege,
       city: formCity,
     })
+    setStep("category")
+  }
+
+  const handleCategorySubmit = () => {
+    if (!formCategory || !formSubcategory) {
+      toast({ title: "Select category + subcategory", variant: "destructive" })
+      return
+    }
     setStep("payment")
   }
 
@@ -116,20 +130,31 @@ export function RegistrationWizard() {
       stream: formStream,
       type: "registration",
       stage: "Paid registration — ₹" + REGISTRATION_FEE + " fee",
-      detail: `Paid ₹${REGISTRATION_FEE} via ${result.method}. Phone: ${formPhone}. Qualification: ${formQualification}, Year: ${formYear}, College: ${formCollege}, City: ${formCity}. Guardian (${formGuardianRole}): ${formGuardianEmail || "not provided"}. Results will be emailed to guardian on completion.`,
+      detail: `Paid ₹${REGISTRATION_FEE} via ${result.method}. Phone: ${formPhone}. Qualification: ${formQualification}, Year: ${formYear}, College: ${formCollege}, City: ${formCity}. Category: ${formCategory} → ${formSubcategory}. Guardian (${formGuardianRole}): ${formGuardianEmail || "not provided"}. Results will be emailed to guardian on completion.`,
+    })
+    // Create the enrollment
+    const cat = CATEGORIES.find((c) => c.title === formCategory)
+    const track = cat?.title.includes("MBA") ? "MBA" : cat?.title.includes("BBA") ? "BBA" : "BSc"
+    createEnrollment({
+      studentEmail: formEmail,
+      category: formCategory,
+      subcategory: formSubcategory,
+      track: track ?? "MBA",
     })
     setStep("confirmation")
   }
 
   return (
     <div className="space-y-4">
-      {/* Progress indicator */}
+      {/* Progress indicator — 4 steps */}
       <div className="flex items-center justify-center gap-2">
         <StepDot active={step === "details"} done={step !== "details"} label="1" icon={User} />
         <div className={`h-0.5 w-8 ${step !== "details" ? "bg-emerald-500" : "bg-border"}`} />
-        <StepDot active={step === "payment"} done={step === "confirmation"} label="2" icon={CreditCard} />
+        <StepDot active={step === "category"} done={step === "payment" || step === "confirmation"} label="2" icon={BookOpen} />
+        <div className={`h-0.5 w-8 ${step === "payment" || step === "confirmation" ? "bg-emerald-500" : "bg-border"}`} />
+        <StepDot active={step === "payment"} done={step === "confirmation"} label="3" icon={CreditCard} />
         <div className={`h-0.5 w-8 ${step === "confirmation" ? "bg-emerald-500" : "bg-border"}`} />
-        <StepDot active={step === "confirmation"} done={false} label="3" icon={CheckCircle2} />
+        <StepDot active={step === "confirmation"} done={false} label="4" icon={CheckCircle2} />
       </div>
 
       {/* Step 1: Details */}
@@ -293,7 +318,86 @@ export function RegistrationWizard() {
         </Card>
       )}
 
-      {/* Step 2: Payment */}
+      {/* Step 2: Category selection */}
+      {step === "category" && (
+        <Card className="shadow-md">
+          <CardHeader>
+            <CardTitle className="text-lg">Select your internship category</CardTitle>
+            <CardDescription>
+              Pick one category and one subcategory. You can enroll in additional categories after
+              completing this internship.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Category grid */}
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {CATEGORIES.filter((c) => !c.badge).map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => { setFormCategory(cat.title); setFormSubcategory("") }}
+                  className={`rounded-lg border p-3 text-left transition-all ${
+                    formCategory === cat.title
+                      ? "border-emerald-500 bg-emerald-50 ring-1 ring-emerald-300"
+                      : "border-border bg-background hover:border-emerald-300 hover:bg-emerald-50/50"
+                  }`}
+                >
+                  <p className="text-sm font-semibold text-foreground">{cat.title}</p>
+                  <p className="mt-1 text-[11px] text-muted-foreground">{cat.blurb}</p>
+                </button>
+              ))}
+            </div>
+
+            {/* Subcategory dropdown */}
+            {formCategory && (
+              <div className="space-y-1.5">
+                <Label className="text-xs">Subcategory</Label>
+                <Select value={formSubcategory} onValueChange={setFormSubcategory}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select subcategory" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORIES.find((c) => c.title === formCategory)?.subcategories.map((s) => (
+                      <SelectItem key={s.name} value={s.name}>{s.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {formSubcategory && (
+                  <div className="mt-2 rounded-md border bg-muted/40 p-3">
+                    <p className="text-xs font-semibold uppercase text-muted-foreground">Projects in this subcategory</p>
+                    <ul className="mt-2 space-y-1">
+                      {CATEGORIES.find((c) => c.title === formCategory)
+                        ?.subcategories.find((s) => s.name === formSubcategory)
+                        ?.projects.map((p, i) => (
+                          <li key={i} className="flex items-center gap-2 text-xs text-foreground">
+                            <ArrowRight className="h-3 w-3 text-emerald-600" />
+                            {p.title}
+                            <Badge variant="outline" className="text-[9px]">{p.level}</Badge>
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+          <CardFooter className="flex-col gap-2 border-t bg-muted/30 p-4">
+            <Button
+              className="w-full bg-emerald-600 hover:bg-emerald-700"
+              onClick={handleCategorySubmit}
+              disabled={!formCategory || !formSubcategory}
+            >
+              Continue to payment
+              <ArrowRight className="ml-1.5 h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setStep("details")} className="w-full">
+              <ArrowLeft className="mr-1 h-3.5 w-3.5" />
+              Back to details
+            </Button>
+          </CardFooter>
+        </Card>
+      )}
+
+      {/* Step 3: Payment */}
       {step === "payment" && (
         <div className="space-y-4">
           <PaymentGateway onPaid={handlePaid} />

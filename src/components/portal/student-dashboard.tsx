@@ -35,6 +35,7 @@ import { TestPapersPanel } from "./test-papers-panel"
 import { SimulationGamePanel } from "./simulation-game-panel"
 import { LeaderboardPanel } from "./leaderboard-panel"
 import { LecturesPanel } from "./lectures-panel"
+import { MyInternshipsPanel } from "./my-internships-panel"
 import { useWeeklyProgress } from "./use-weekly-progress"
 import { useTestProgressHelpers, useMounted } from "./use-test-progress"
 import { useSimulation } from "./simulation-store"
@@ -481,6 +482,9 @@ export function StudentDashboard() {
             </Card>
           </div>
         </div>
+
+            {/* My Internships — enrollment overview + enroll in new category */}
+            <MyInternshipsPanel />
 
             {/* Quick-jump cards — let students jump to any tab from Overview */}
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
