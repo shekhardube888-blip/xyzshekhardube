@@ -853,6 +853,477 @@ const BSC_DS_WEEKS: Week[] = [
   },
 ]
 
+// ─── BBA Digital Marketing track (8 weeks) ───
+
+const BBA_DIGITAL_WEEKS: Week[] = [
+  {
+    id: 1, short: "W1", title: "SEO Fundamentals & Keyword Research",
+    objective: "Master on-page SEO, keyword research, and search intent classification.",
+    estimatedMinutes: 120,
+    task: "Perform keyword research for a D2C skincare brand. Identify 10 target keywords with search volume, difficulty, and intent classification. Build a keyword cluster map.",
+    quiz: [
+      q("q1", "SEO differs from SEM in that SEO is:", ["Always free", "Optimisation for organic search results (unpaid), while SEM is paid search ads", "Optimisation for social media", "Optimisation for email"], 1, "SEO = organic search; SEM = paid search ads."),
+      q("q2", "A 'keyword cluster' is:", ["A single high-volume keyword", "A group of related keywords sharing search intent that one page can rank for", "A list of branded keywords", "A list of competitor brand names"], 1, "Keyword cluster = related keywords sharing intent."),
+      q("q3", "Search intent for 'best face wash under ₹500' is:", ["Informational (awareness)", "Navigational", "Transactional / Commercial (decision)", "Brand query"], 2, "High purchase intent = transactional/commercial (BOFU)."),
+      q("q4", "The ideal publishing cadence for a new D2C content engine is roughly:", ["1 piece per quarter", "2-3 pieces per week", "10 pieces per day", "1 piece per year"], 1, "2-3/week balances velocity, quality, and capacity."),
+    ],
+    scenario: {
+      brand: "Plum — Clean Beauty D2C",
+      brief: "Plum wants to build organic traffic for their face wash category. Currently 100% of traffic is from paid Meta + Google ads. They want to rank for 'best face wash for oily skin', 'vitamin C face wash', and 'paraben free face wash'. Current monthly organic visits: 1,200.",
+      asks: ["Build a keyword cluster map for the face wash category", "Identify the #1 highest-leverage content piece for month 1"],
+    },
+    solutionPrompt: "Write a 300-450 word SEO plan: 10 keywords (volume, difficulty, intent), 3 keyword clusters, and the #1 content piece to create first.",
+    minWords: 300, maxWords: 450,
+  },
+  {
+    id: 2, short: "W2", title: "On-Page SEO & Technical Audit",
+    objective: "Audit and fix on-page SEO elements + technical SEO issues.",
+    estimatedMinutes: 120,
+    task: "Perform a technical SEO audit of a live e-commerce site. Check: meta tags, schema markup, page speed, mobile-friendliness, URL structure, internal linking. Produce a prioritized fix list.",
+    quiz: [
+      q("q1", "The title tag should ideally be:", ["Under 30 characters", "50-60 characters (before Google truncates)", "200+ characters", "Exactly 10 characters"], 1, "50-60 chars before truncation in SERP."),
+      q("q2", "Schema markup (structured data) helps Google understand:", ["Your logo", "Product, reviews, FAQs, breadcrumbs — enabling rich snippets", "Your server location", "Your ad spend"], 1, "Schema enables rich snippets (product, reviews, FAQs)."),
+      q("q3", "A '301 redirect' is:", ["A temporary redirect", "A permanent redirect that passes link equity", "An error page", "A canonical tag"], 1, "301 = permanent redirect, passes link equity."),
+      q("q4", "Core Web Vitals measure:", ["Backlinks", "Page experience: loading (LCP), interactivity (INP), visual stability (CLS)", "Keyword density", "Domain authority"], 1, "Core Web Vitals = LCP, INP, CLS — page experience signals."),
+    ],
+    scenario: {
+      brand: "Mamaearth — Technical SEO Audit",
+      brief: "Mamaearth's product pages load in 4.2 seconds (target: <2.5s). 30% of product pages are missing meta descriptions. The site has 500+ product pages but only 50 internal links. Mobile PageSpeed score: 35/100.",
+      asks: ["Produce a prioritized technical SEO fix list (top 5 issues)", "Estimate the traffic impact of fixing each issue"],
+    },
+    solutionPrompt: "Write a 350-500 word technical SEO audit: top 5 issues, impact estimate per issue, fix approach, and priority order.",
+    minWords: 350, maxWords: 500,
+  },
+  {
+    id: 3, short: "W3", title: "Meta Ads (Facebook + Instagram)",
+    objective: "Build, launch, and optimize a Meta Ads campaign structure.",
+    estimatedMinutes: 150,
+    task: "Design a Meta Ads campaign for a product launch. Include: campaign objective, 3 ad sets (audience + placement + budget), 4 creative variants per ad set, and a measurement plan.",
+    quiz: [
+      q("q1", "On Meta Ads, an 'ad set' is structured around:", ["Creative assets", "Audience + placement + budget + schedule", "Campaign objective", "Pixel events"], 1, "Ad set = audience + placement + budget + schedule."),
+      q("q2", "For a zero-awareness product launch, the BEST Meta objective is:", ["Sales (Conversions)", "Reach", "Engagement", "Traffic"], 1, "Reach builds awareness for zero-awareness launches before performance harvesting."),
+      q("q3", "The Meta Pixel is used for:", ["A/B testing", "Tracking website conversions + retargeting", "Auto-generating creatives", "Refunding ad spend"], 1, "Pixel tracks website conversions + enables retargeting."),
+      q("q4", "For A/B testing creatives, the recommended variants per ad set is:", ["1", "3-4", "10+", "25"], 1, "3-4 variants lets Meta optimise meaningfully."),
+    ],
+    scenario: {
+      brand: "Sugar Cosmetics — Lipstick Launch",
+      brief: "Sugar Cosmetics is launching a new matte lipstick line. Target: 22-28 year old women in 6 metros. Budget: ₹2L for 4 weeks. Goal: 10,000 units sold at ₹299 each. Current Meta Ads CPA for similar launches: ₹180.",
+      asks: ["Design the full campaign structure (objective + 3 ad sets + creatives)", "Project the expected ROAS"],
+    },
+    solutionPrompt: "Write a 400-550 word Meta Ads plan: campaign objective, 3 ad sets (audience + creative angle + budget), measurement plan, and projected ROAS.",
+    minWords: 400, maxWords: 550,
+  },
+  {
+    id: 4, short: "W4", title: "Google Ads & Search Marketing",
+    objective: "Build and optimize Google Search + Shopping ad campaigns.",
+    estimatedMinutes: 150,
+    task: "Design a Google Ads strategy for a D2C brand. Include: Search campaign structure (3 ad groups + match types + extensions), Shopping campaign setup, and a keyword negative list.",
+    quiz: [
+      q("q1", "Google Shopping ads require:", ["A Google My Business account", "A Google Merchant Center product feed", "A YouTube channel", "A Google+ account"], 1, "Shopping ads need a Merchant Center product feed."),
+      q("q2", "The match type that gives the MOST control is:", ["Broad match", "Phrase match", "Exact match", "Negative match"], 2, "Exact match = most control (only triggers on exact query)."),
+      q("q3", "Quality Score in Google Ads is affected by:", ["Bid amount", "CTR + ad relevance + landing page experience", "Number of keywords", "Account age"], 1, "Quality Score = CTR + ad relevance + landing page experience."),
+      q("q4", "A 'negative keyword' list is used to:", ["Boost ad rankings", "Prevent ads from showing on irrelevant queries", "Increase CPC", "Target competitors"], 1, "Negative keywords prevent wasted spend on irrelevant queries."),
+    ],
+    scenario: {
+      brand: "Wakefit — Mattress Google Ads",
+      brief: "Wakefit wants to dominate Google Search for 'buy mattress online India'. Current CPC: ₹45. Budget: ₹3L/month. They have 15 mattress SKUs. Competitors: Sleepwell, Kurlon, SleepyCat all bidding on the same keyword.",
+      asks: ["Design the Search + Shopping campaign structure", "Build a negative keyword list (20+ keywords)"],
+    },
+    solutionPrompt: "Write a 400-550 word Google Ads plan: campaign structure (Search + Shopping), 3 ad groups with match types, negative keyword list (20+), and expected CPC + ROAS.",
+    minWords: 400, maxWords: 550,
+  },
+  {
+    id: 5, short: "W5", title: "Content Marketing & Social Media",
+    objective: "Build a 30-day content calendar mapped to funnel stages + social media strategy.",
+    estimatedMinutes: 120,
+    task: "Create a 30-day content calendar for a D2C brand. Map each piece to a funnel stage (TOFU/MOFU/BOFU), platform (Instagram/Blog/YouTube/LinkedIn), and content format.",
+    quiz: [
+      q("q1", "TOFU content is BEST measured by:", ["Direct purchases", "Reach + impressions + brand recall", "Conversion rate", "ROAS"], 1, "TOFU = reach, impressions, recall."),
+      q("q2", "Instagram Reels are BEST for:", ["Long-form product reviews", "Short viral awareness content (TOFU)", "B2B lead gen", "Email signups"], 1, "Reels = short viral awareness (TOFU)."),
+      q("q3", "A 'content pillar' is:", ["A single blog post", "A core topic theme that multiple content pieces support", "A social media tool", "A type of ad"], 1, "Content pillar = core theme supporting multiple pieces."),
+      q("q4", "The BEST content format for BOFU (decision stage) is:", ["'Why skincare matters' blog", "Product comparison page + customer reviews + demo video", "Founder interview", "Industry trend report"], 1, "BOFU = comparison + reviews + demo."),
+    ],
+    scenario: {
+      brand: "Boldcare — Men's Grooming Content",
+      brief: "Boldcare is launching a men's face wash. They have ₹50,000 content budget and 1 content creator. They need: 12 Instagram posts, 4 Reels, 2 blog posts, and 1 YouTube demo video over 30 days.",
+      asks: ["Build the 30-day content calendar", "Allocate the ₹50,000 budget across formats"],
+    },
+    solutionPrompt: "Write a 400-550 word content plan: 30-day calendar (12 posts + 4 reels + 2 blogs + 1 video), funnel stage mapping, budget allocation, and the #1 piece most likely to go viral.",
+    minWords: 400, maxWords: 550,
+  },
+  {
+    id: 6, short: "W6", title: "Email Marketing & Automation",
+    objective: "Build an email automation flow that nurtures leads + recovers abandoned carts.",
+    estimatedMinutes: 120,
+    task: "Design 3 email automation flows: (1) Welcome sequence (5 emails), (2) Abandoned cart recovery (3 emails), (3) Post-purchase nurture (3 emails). Write the subject lines + preview text for each.",
+    quiz: [
+      q("q1", "A 'drip email campaign' is:", ["1 email per year", "A sequence of pre-scheduled emails triggered by a user action", "Spam", "Internal team updates"], 1, "Drip = pre-scheduled sequence triggered by action."),
+      q("q2", "The average email open rate for D2C brands is roughly:", ["5%", "20-25%", "80%", "100%"], 1, "D2C open rates: 20-25% typically."),
+      q("q3", "Abandoned cart emails have an average conversion rate of roughly:", ["0.1%", "10-15%", "50%", "90%"], 1, "Cart abandonment emails: ~10-15% conversion."),
+      q("q4", "The BEST email subject line strategy is:", ["ALL CAPS", "Personalized + concise + creates curiosity without clickbait", "Very long (100+ chars)", "Always includes a discount code"], 1, "Personalized + concise + curiosity (no clickbait)."),
+    ],
+    scenario: {
+      brand: "Zunaro — Skincare Email Automation",
+      brief: "Zunaro gets 5,000 new email signups/month but only 2% convert to purchase. 40% of users add products to cart but abandon. They have no email automation currently.",
+      asks: ["Design the 3 automation flows (welcome, cart recovery, post-purchase)", "Project the revenue impact"],
+    },
+    solutionPrompt: "Write a 400-550 word email automation plan: 3 flows (11 emails total), subject lines + preview text for each, trigger rules, and projected revenue impact.",
+    minWords: 400, maxWords: 550,
+  },
+  {
+    id: 7, short: "W7", title: "Analytics & Conversion Rate Optimization",
+    objective: "Set up GA4, analyze user behavior, and run CRO experiments.",
+    estimatedMinutes: 150,
+    task: "Set up a GA4 measurement plan for a D2C site. Define 5 key events, set up 2 conversion funnels, and design 2 A/B tests to improve conversion rate.",
+    quiz: [
+      q("q1", "GA4 tracks:", ["Only e-commerce purchases", "Events across web + app in a unified property", "Ad spend", "SEO rankings"], 1, "GA4 = event-based, cross-platform."),
+      q("q2", "A 'conversion funnel' in GA4 shows:", ["Total revenue", "Where users drop off between steps in a desired flow", "Keyword rankings", "Email open rates"], 1, "Funnel shows drop-off between steps."),
+      q("q3", "A/B testing requires:", ["100 visitors total", "Statistical significance — typically 1,000+ visitors per variant + 95% confidence", "1 visitor", "100,000 visitors"], 1, "Statistical significance: 1,000+ per variant + 95% confidence."),
+      q("q4", "CRO (Conversion Rate Optimization) focuses on:", ["Getting more traffic", "Improving the % of existing visitors who convert", "Increasing ad spend", "Building more pages"], 1, "CRO = improve conversion % of existing traffic."),
+    ],
+    scenario: {
+      brand: "Boat — Audio CRO",
+      brief: "Boat's product pages have a 2.1% conversion rate (industry avg: 3.5%). The bounce rate is 65%. Average time on page: 45 seconds. You suspect the product images + reviews section aren't compelling enough.",
+      asks: ["Design 2 A/B tests to improve conversion rate", "Set up the GA4 funnel to measure results"],
+    },
+    solutionPrompt: "Write a 400-550 word CRO plan: GA4 event setup, 2 funnel definitions, 2 A/B test designs (hypothesis + variant + success metric + sample size), and projected conversion rate lift.",
+    minWords: 400, maxWords: 550,
+  },
+  {
+    id: 8, short: "W8", title: "Capstone — Full Digital Marketing Strategy",
+    objective: "Present a complete integrated digital marketing strategy.",
+    estimatedMinutes: 180,
+    task: "Compile a full digital marketing strategy: SEO + SEM + Social + Content + Email + Analytics. Present as a 10-slide deck with budget allocation, projected ROAS, and 90-day roadmap.",
+    quiz: [
+      q("q1", "An 'integrated digital marketing strategy' means:", ["Running only SEO", "Coordinating SEO + SEM + Social + Content + Email + Analytics into one plan", "Doing PR + social in silos", "Only running paid ads"], 1, "Integrated = all channels coordinated."),
+      q("q2", "The typical budget split for a new D2C brand (₹10L/month) is roughly:", ["100% SEO", "40% paid ads, 20% content, 15% SEO, 15% social, 10% email/tools", "100% TV", "100% billboards"], 1, "Balanced split across channels."),
+      q("q3", "The 'north-star metric' for a D2C digital marketing team should be:", ["Impressions", "Blended ROAS (total revenue / total marketing spend)", "Follower count", "Email list size"], 1, "Blended ROAS = total revenue / total marketing spend."),
+      q("q4", "When presenting a digital strategy to the CEO, you should:", ["Show all the data", "Lead with the north-star metric + 90-day roadmap, then channel details", "Skip the results", "Only show code"], 1, "Lead with north-star + roadmap, then details."),
+    ],
+    scenario: {
+      brand: "Capstone — Your D2C Brand",
+      brief: "Choose a D2C brand. Build a complete 90-day digital marketing strategy with ₹10L monthly budget. Present to the leadership team.",
+      asks: ["Present the full strategy as 10 slides", "End with projected blended ROAS + 3 key milestones"],
+    },
+    solutionPrompt: "Write a 500-650 word capstone: SEO plan, SEM plan, social plan, content plan, email plan, analytics setup, budget split, projected ROAS, and 3 milestones.",
+    minWords: 500, maxWords: 650,
+  },
+]
+
+// ─── BSc Biotechnology track (8 weeks) ───
+
+const BSC_BIOTECH_WEEKS: Week[] = [
+  {
+    id: 1, short: "W1", title: "Bioinformatics Basics & Sequence Analysis",
+    objective: "Master DNA/protein sequence analysis tools and databases.",
+    estimatedMinutes: 120,
+    task: "Retrieve a gene sequence from NCBI, perform a BLAST search, and annotate the results. Submit a 1-page analysis of the sequence's function + homologs.",
+    quiz: [
+      q("q1", "BLAST is used for:", ["Protein purification", "Sequence similarity search against databases", "Cell culture", "PCR"], 1, "BLAST = Basic Local Alignment Search Tool."),
+      q("q2", "NCBI GenBank is a database of:", ["Lab equipment", "Annotated nucleotide + protein sequences", "Clinical trials", "Patents"], 1, "GenBank = annotated nucleotide + protein sequences."),
+      q("q3", "A 'homologous gene' is one that:", ["Has no function", "Shares common ancestry + similar sequence across species", "Is synthetic", "Is only found in bacteria"], 1, "Homologous = common ancestry + similar sequence."),
+      q("q4", "The FASTA format for sequences starts with:", ["A number", "A '>' header line followed by the sequence", "An XML tag", "A JSON object"], 1, "FASTA starts with '>' header line."),
+    ],
+    scenario: {
+      brand: "Pharma Research Lab",
+      brief: "You're interning at a pharma research lab. You've been given an unknown 500bp DNA sequence from a soil bacterium. You need to identify what gene it is, find homologs, and predict its function.",
+      asks: ["Perform the BLAST analysis", "Predict the gene's function + evolutionary conservation"],
+    },
+    solutionPrompt: "Write a 300-450 word sequence analysis report: BLAST results, top 3 hits, predicted function, conservation across species, and potential research significance.",
+    minWords: 300, maxWords: 450,
+  },
+  {
+    id: 2, short: "W2", title: "Protein Structure & Visualization",
+    objective: "Understand protein structure levels and use visualization tools.",
+    estimatedMinutes: 120,
+    task: "Retrieve a protein structure from PDB, visualize it using PyMOL or Chimera, and identify secondary structure elements + active sites.",
+    quiz: [
+      q("q1", "The PDB (Protein Data Bank) stores:", ["DNA sequences only", "3D protein + nucleic acid structures", "Lab protocols", "Clinical data"], 1, "PDB = 3D biomolecular structures."),
+      q("q2", "Protein secondary structure includes:", ["Primary sequence", "Alpha helices + beta sheets", "Quaternary assembly", "Disulfide bonds"], 1, "Secondary = alpha helices + beta sheets."),
+      q("q3", "An 'active site' in a protein is:", ["The surface of the protein", "The region where substrate binds + catalysis occurs", "The N-terminus", "The disulfide bond"], 1, "Active site = substrate binding + catalysis region."),
+      q("q4", "PyMOL is primarily used for:", ["DNA sequencing", "3D protein structure visualization", "Cell counting", "Statistical analysis"], 1, "PyMOL = 3D molecular visualization."),
+    ],
+    scenario: {
+      brand: "Drug Discovery Lab",
+      brief: "Your lab is studying a target enzyme for a new antibiotic. You need to understand its 3D structure, identify the active site, and find potential drug-binding pockets.",
+      asks: ["Visualize the enzyme structure + identify the active site", "Identify 2 potential drug-binding pockets"],
+    },
+    solutionPrompt: "Write a 300-450 word structure analysis: PDB ID, secondary structure elements, active site location, 2 potential binding pockets, and drug design implications.",
+    minWords: 300, maxWords: 450,
+  },
+  {
+    id: 3, short: "W3", title: "PCR, Cloning & Molecular Techniques",
+    objective: "Design PCR primers + understand molecular cloning workflow.",
+    estimatedMinutes: 120,
+    task: "Design PCR primers for a target gene (specify: length, Tm, GC content, specificity). Outline a cloning workflow (restriction digestion → ligation → transformation → screening).",
+    quiz: [
+      q("q1", "PCR primer length should ideally be:", ["5-10 bases", "18-25 bases", "100+ bases", "500 bases"], 1, "18-25 bases for specificity + efficient annealing."),
+      q("q2", "The ideal GC content for PCR primers is:", ["10%", "40-60%", "90%", "100%"], 1, "40-60% GC content for stable annealing."),
+      q("q3", "In molecular cloning, 'transformation' refers to:", ["PCR amplification", "Inserting recombinant DNA into host cells (e.g., E. coli)", "Protein purification", "DNA sequencing"], 1, "Transformation = inserting recombinant DNA into host cells."),
+      q("q4", "A 'restriction enzyme' cuts DNA at:", ["Random positions", "Specific recognition sequences (e.g., GAATTC)", "The start codon", "Only RNA"], 1, "Restriction enzymes cut at specific recognition sequences."),
+    ],
+    scenario: {
+      brand: "Genetic Engineering Project",
+      brief: "You need to clone a human insulin gene into an E. coli expression vector for recombinant protein production. Design the full cloning workflow.",
+      asks: ["Design the PCR primers for the insulin gene", "Outline the 5-step cloning workflow"],
+    },
+    solutionPrompt: "Write a 350-500 word cloning plan: primer design (sequence, Tm, GC%), restriction sites, vector choice, 5-step workflow, and screening method.",
+    minWords: 350, maxWords: 500,
+  },
+  {
+    id: 4, short: "W4", title: "Cell Culture & Lab Techniques",
+    objective: "Master aseptic cell culture techniques + common assays.",
+    estimatedMinutes: 120,
+    task: "Design a cell culture experiment: maintain a mammalian cell line, perform a MTT viability assay, and document the protocol + expected results.",
+    quiz: [
+      q("q1", "Aseptic technique in cell culture is critical because:", ["It speeds up growth", "It prevents microbial contamination of cell cultures", "It reduces cost", "It improves protein yield"], 1, "Aseptic technique prevents contamination."),
+      q("q2", "The MTT assay measures:", ["DNA concentration", "Cell viability/metabolic activity", "Protein size", "pH"], 1, "MTT = cell viability via metabolic activity."),
+      q("q3", "A 'passage' in cell culture refers to:", ["A lab corridor", "Splitting/transferring cells to a new flask to maintain growth", "A research paper", "A type of media"], 1, "Passage = splitting cells to maintain growth."),
+      q("q4", "CO2 incubators for mammalian cells typically maintain:", ["0% CO2", "5% CO2 at 37°C", "20% CO2", "100% CO2"], 1, "5% CO2 at 37°C for mammalian cell culture."),
+    ],
+    scenario: {
+      brand: "Cancer Research Lab",
+      brief: "You're testing a new anti-cancer compound on HeLa cells. You need to: culture the cells, treat them with 3 concentrations of the compound, and measure viability after 48 hours.",
+      asks: ["Design the cell culture + MTT assay experiment", "Define the controls + expected results"],
+    },
+    solutionPrompt: "Write a 350-500 word experiment plan: cell line info, culture conditions, treatment protocol (3 concentrations), MTT assay steps, controls, and expected viability curves.",
+    minWords: 350, maxWords: 500,
+  },
+  {
+    id: 5, short: "W5", title: "Pharma QC & GMP Documentation",
+    objective: "Understand GMP regulations + perform stability study analysis.",
+    estimatedMinutes: 120,
+    task: "Design a stability study protocol for a new drug formulation. Define: storage conditions, time points, test parameters, and acceptance criteria. Document per GMP standards.",
+    quiz: [
+      q("q1", "GMP stands for:", ["General Manufacturing Process", "Good Manufacturing Practice", "Global Marketing Plan", "Genetic Modification Protocol"], 1, "GMP = Good Manufacturing Practice."),
+      q("q2", "A stability study for pharma tests:", ["Marketing effectiveness", "Drug degradation over time under defined storage conditions", "Patient satisfaction", "Sales numbers"], 1, "Stability studies test drug degradation over time."),
+      q("q3", "ICH guidelines for stability testing define storage conditions as:", ["Room temp only", "25°C/60% RH (long-term), 40°C/75% RH (accelerated)", "-20°C only", "100°C"], 1, "ICH: 25°C/60% RH long-term, 40°C/75% RH accelerated."),
+      q("q4", "An 'OOS' (Out of Specification) result means:", ["The product is perfect", "A test result falls outside the predefined acceptance criteria", "The lab is closed", "The product is a bestseller"], 1, "OOS = result outside acceptance criteria."),
+    ],
+    scenario: {
+      brand: "Pharma Manufacturing — Stability Study",
+      brief: "Your company is formulating a new paracetamol tablet. Regulatory requires a 24-month stability study. Design the protocol per ICH guidelines.",
+      asks: ["Design the stability study protocol", "Define 5 key test parameters + acceptance criteria"],
+    },
+    solutionPrompt: "Write a 400-550 word stability protocol: storage conditions (long-term + accelerated), time points, 5 test parameters with acceptance criteria, and GMP documentation requirements.",
+    minWords: 400, maxWords: 550,
+  },
+  {
+    id: 6, short: "W6", title: "Biostatistics & Clinical Data Analysis",
+    objective: "Apply biostatistics to analyze clinical/experimental data.",
+    estimatedMinutes: 150,
+    task: "Analyze a clinical trial dataset: calculate descriptive statistics, perform hypothesis testing (t-test/ANOVA), and interpret p-values + confidence intervals for the treatment effect.",
+    quiz: [
+      q("q1", "A p-value of 0.03 at α=0.05 means:", ["The null is definitely true", "There's a 3% chance of observing this data if the null were true — reject the null", "The result is practically significant", "The sample size is 3"], 1, "p=0.03 < 0.05 → reject null."),
+      q("q2", "ANOVA is used when comparing:", ["2 groups", "3+ groups simultaneously", "2 correlated variables", "Time series"], 1, "ANOVA = 3+ groups."),
+      q("q3", "A Type I error (false positive) is:", ["Rejecting a true null hypothesis", "Failing to reject a false null", "Setting α too low", "Increasing sample size"], 0, "Type I = reject true null (false positive)."),
+      q("q4", "In clinical trials, 'randomization' is used to:", ["Increase sample size", "Minimize selection bias by randomly assigning patients to treatment groups", "Reduce cost", "Speed up the trial"], 1, "Randomization minimizes selection bias."),
+    ],
+    scenario: {
+      brand: "Clinical Trial Analysis",
+      brief: "You're analyzing data from a Phase II clinical trial of a new anti-diabetic drug vs placebo. 120 patients (60 drug + 60 placebo). Primary endpoint: HbA1c reduction after 12 weeks.",
+      asks: ["Perform the statistical analysis + interpret results", "Write the conclusions for the clinical study report"],
+    },
+    solutionPrompt: "Write a 400-550 word statistical analysis: descriptive stats per group, hypothesis test (t-test/ANOVA), p-value + CI interpretation, effect size, and clinical significance conclusion.",
+    minWords: 400, maxWords: 550,
+  },
+  {
+    id: 7, short: "W7", title: "Regulatory Affairs & Drug Approval",
+    objective: "Understand the drug approval process (FDA/CDSCO) + regulatory submissions.",
+    estimatedMinutes: 120,
+    task: "Outline the drug approval pathway in India (CDSCO). Document the phases of clinical trials + the regulatory submissions required at each stage.",
+    quiz: [
+      q("q1", "CDSCO is the regulatory body for drugs in:", ["USA", "India", "EU", "Japan"], 1, "CDSCO = Central Drugs Standard Control Organisation (India)."),
+      q("q2", "Phase I clinical trials primarily test:", ["Efficacy in 1000+ patients", "Safety + dosage in 20-80 healthy volunteers", "Marketing strategy", "Pricing"], 1, "Phase I = safety + dosage in 20-80 volunteers."),
+      q("q3", "An IND (Investigational New Drug) application is filed:", ["After market launch", "Before starting clinical trials in humans", "After Phase III", "Only for generics"], 1, "IND = before human trials."),
+      q("q4", "Phase III trials typically involve:", ["20-80 patients", "100-500 patients", "1,000-5,000+ patients across multiple sites", "1 patient"], 2, "Phase III = 1,000-5,000+ patients."),
+    ],
+    scenario: {
+      brand: "Regulatory Submission — New Drug",
+      brief: "Your company has completed preclinical studies for a new anti-cancer drug. You need to plan the regulatory pathway from IND to market approval in India.",
+      asks: ["Outline the full approval pathway (phases + submissions)", "Estimate timeline + cost"],
+    },
+    solutionPrompt: "Write a 400-550 word regulatory pathway: IND → Phase I-III → NDA → approval, submissions at each stage, estimated timeline (years), and key risks.",
+    minWords: 400, maxWords: 550,
+  },
+  {
+    id: 8, short: "W8", title: "Capstone — Biotech Research Project",
+    objective: "Present a complete biotech research project from hypothesis to regulatory plan.",
+    estimatedMinutes: 180,
+    task: "Compile a full biotech research project: hypothesis → literature review → experimental design → data analysis → regulatory pathway → conclusions. Present as a 10-slide scientific presentation.",
+    quiz: [
+      q("q1", "A 'research hypothesis' should be:", ["Vague", "Specific, testable, and falsifiable", "Unfalsifiable", "A question"], 1, "Hypothesis = specific, testable, falsifiable."),
+      q("q2", "A 'literature review' is important because it:", ["Fills page count", "Identifies existing knowledge, gaps, and avoids duplicating research", "Is required by HR", "Increases lab budget"], 1, "Literature review identifies gaps + avoids duplication."),
+      q("q3", "When presenting biotech research to non-scientists, you should:", ["Show all raw data", "Lead with the problem + potential impact, then methods + results", "Skip the conclusion", "Only show chemical structures"], 1, "Lead with problem + impact → methods → results."),
+      q("q4", "The biggest ethical risk in biotech research is:", ["Using too many pipettes", "Inadequate informed consent + data fabrication + conflict of interest", "Using Python", "Having too much funding"], 1, "Ethical risks: consent, fabrication, conflicts."),
+    ],
+    scenario: {
+      brand: "Capstone — Your Research Project",
+      brief: "Design a complete research project for a novel biotech application (e.g., CRISPR-based diagnostic, recombinant protein therapy, biosimilar development). Present to a review committee.",
+      asks: ["Present the full project as 10 slides", "End with the potential impact + next steps"],
+    },
+    solutionPrompt: "Write a 500-650 word capstone: hypothesis, literature gap, experimental design, expected results, data analysis plan, regulatory pathway, and potential impact.",
+    minWords: 500, maxWords: 650,
+  },
+]
+
+// ─── BSc Statistics track (8 weeks) ───
+
+const BSC_STATS_WEEKS: Week[] = [
+  {
+    id: 1, short: "W1", title: "Probability Distributions & Descriptive Statistics",
+    objective: "Master probability distributions and descriptive statistical analysis.",
+    estimatedMinutes: 120,
+    task: "Analyze a dataset using descriptive statistics (mean, median, mode, variance, skewness, kurtosis). Identify the underlying probability distribution and test goodness-of-fit.",
+    quiz: [
+      q("q1", "The normal distribution is fully described by:", ["Mean and median", "Mean (μ) and standard deviation (σ)", "Mode and range", "Sample size"], 1, "N(μ, σ²) — mean + std dev."),
+      q("q2", "A distribution with skewness > 0 is:", ["Symmetric", "Right-skewed (positive skew)", "Left-skewed", "Uniform"], 1, "Skewness > 0 = right-skewed."),
+      q("q3", "The median is more robust than the mean when:", ["Data is symmetric", "Data has extreme outliers", "Sample size is large", "Data is continuous"], 1, "Median is robust to outliers."),
+      q("q4", "The Poisson distribution models:", ["Continuous data", "Count of rare events in a fixed interval (e.g., defects per batch)", "Normal data", "Categorical data"], 1, "Poisson = count of rare events."),
+    ],
+    scenario: {
+      brand: "Manufacturing Quality Data",
+      brief: "A manufacturing plant produces 10,000 units/day. You have 30 days of defect data: average 15 defects/day, range 5-28. The QA team wants to understand the defect distribution + set control limits.",
+      asks: ["Analyze the defect data distribution", "Recommend control limits (UCL/LCL)"],
+    },
+    solutionPrompt: "Write a 300-450 word statistical analysis: descriptive stats, distribution identification, goodness-of-fit, and recommended control limits.",
+    minWords: 300, maxWords: 450,
+  },
+  {
+    id: 2, short: "W2", title: "Hypothesis Testing & P-values",
+    objective: "Design + execute hypothesis tests for business problems.",
+    estimatedMinutes: 120,
+    task: "Design 3 hypothesis tests for a business problem: (1) one-sample t-test, (2) two-sample t-test, (3) chi-square test. State H0, H1, α, test statistic, decision rule, and interpretation.",
+    quiz: [
+      q("q1", "A p-value of 0.01 at α=0.05 means:", ["Accept the null", "Reject the null — strong evidence against it", "The result is practically significant", "Sample size is too small"], 1, "p=0.01 < 0.05 → reject null."),
+      q("q2", "Type II error (false negative) is:", ["Rejecting a true null", "Failing to reject a false null", "Setting α too high", "Decreasing sample size"], 1, "Type II = fail to reject false null."),
+      q("q3", "The chi-square test is used for:", ["Comparing means", "Testing independence between categorical variables", "Time series", "Regression"], 1, "Chi-square = categorical variable independence."),
+      q("q4", "Statistical power is the probability of:", ["Type I error", "Correctly rejecting a false null (1 - β)", "Type II error", "Accepting the null"], 1, "Power = 1 - β = P(reject false null)."),
+    ],
+    scenario: {
+      brand: "A/B Test — E-commerce Checkout",
+      brief: "An e-commerce site ran an A/B test: Variant A (old checkout) vs Variant B (new checkout). 5,000 visitors each. A: 4.2% conversion. B: 4.8% conversion. Is the difference statistically significant?",
+      asks: ["Perform the hypothesis test", "Recommend: ship Variant B or run longer?"],
+    },
+    solutionPrompt: "Write a 350-500 word hypothesis test: H0 + H1, test choice (two-proportion z-test), test statistic, p-value, decision, and business recommendation.",
+    minWords: 350, maxWords: 500,
+  },
+  {
+    id: 3, short: "W3", title: "Linear Regression & Correlation",
+    objective: "Build + interpret linear regression models.",
+    estimatedMinutes: 150,
+    task: "Build a simple + multiple linear regression model for a business dataset. Interpret coefficients, R², adjusted R², and residual plots. Check regression assumptions.",
+    quiz: [
+      q("q1", "R² (coefficient of determination) measures:", ["Error magnitude", "Proportion of variance in y explained by the model", "Number of predictors", "Sample size"], 1, "R² = explained variance proportion."),
+      q("q2", "Correlation coefficient r = -0.9 means:", ["No relationship", "Strong negative linear relationship", "Strong positive relationship", "Causal relationship"], 1, "r = -0.9 = strong negative correlation."),
+      q("q3", "A residual plot should show:", ["A clear pattern", "Random scatter (no pattern) — indicates good model fit", "A straight line", "Increasing variance only"], 1, "Random residuals = good fit."),
+      q("q4", "Multicollinearity in regression means:", ["No correlation", "Predictor variables are highly correlated with each other", "The model is perfect", "Sample size is too large"], 1, "Multicollinearity = correlated predictors."),
+    ],
+    scenario: {
+      brand: "Sales Forecasting — Regression",
+      brief: "A retail chain wants to predict monthly sales based on: ad spend, number of promotions, store footfall, and competitor pricing. You have 36 months of data.",
+      asks: ["Build the regression model + interpret coefficients", "Check assumptions + identify issues"],
+    },
+    solutionPrompt: "Write a 400-550 word regression analysis: model equation, coefficient interpretation, R² + adjusted R², residual diagnostics, assumption checks, and recommendations.",
+    minWords: 400, maxWords: 550,
+  },
+  {
+    id: 4, short: "W4", title: "Sampling Design & Survey Methods",
+    objective: "Design statistically valid sampling plans + surveys.",
+    estimatedMinutes: 120,
+    task: "Design a sampling plan for a customer satisfaction survey. Define: target population, sampling frame, sample size (with formula + justification), and sampling method.",
+    quiz: [
+      q("q1", "Stratified random sampling is BEST when:", ["The population is homogeneous", "The population has distinct subgroups you want represented proportionally", "Sample size is very large", "There's no budget"], 1, "Stratified sampling ensures subgroup representation."),
+      q("q2", "The formula for sample size (simple random, known population) is:", ["n = N", "n = (Z² × p × q) / e² (for infinite population)", "n = 1", "n = N / 2"], 1, "n = (Z² × p × q) / e² for proportions."),
+      q("q3", "A 'sampling frame' is:", ["A picture frame", "The list of all units in the target population from which the sample is drawn", "A type of survey", "A statistical test"], 1, "Sampling frame = list of all population units."),
+      q("q4", "Non-response bias occurs when:", ["Everyone responds", "Those who don't respond differ systematically from those who do", "Sample size is too large", "The survey is too short"], 1, "Non-response bias = non-respondents differ from respondents."),
+    ],
+    scenario: {
+      brand: "Customer Satisfaction Survey",
+      brief: "A telecom company with 10 million customers wants to measure customer satisfaction. They need results within ±3% margin of error at 95% confidence. Budget allows surveying 1,500 customers.",
+      asks: ["Design the sampling plan + calculate required sample size", "Choose the sampling method + justify"],
+    },
+    solutionPrompt: "Write a 350-500 word sampling plan: population, sample size calculation, method choice, stratification (if any), and non-response mitigation strategy.",
+    minWords: 350, maxWords: 500,
+  },
+  {
+    id: 5, short: "W5", title: "ANOVA & Experimental Design",
+    objective: "Design experiments + analyze using ANOVA.",
+    estimatedMinutes: 150,
+    task: "Design a factorial experiment (2 factors × 3 levels each). Analyze using two-way ANOVA. Interpret main effects + interaction effects. Create an interaction plot.",
+    quiz: [
+      q("q1", "One-way ANOVA compares:", ["2 groups", "3+ group means simultaneously", "2 correlated variables", "Time series"], 1, "One-way ANOVA = 3+ groups."),
+      q("q2", "A 'full factorial design' with 2 factors × 3 levels requires:", ["3 treatment combinations", "6 treatment combinations (2×3)", "12 combinations", "1 combination"], 1, "2 × 3 = 6 treatment combinations."),
+      q("q3", "An 'interaction effect' in ANOVA means:", ["The effect of one factor depends on the level of another factor", "Both factors are independent", "There's no effect", "The model is perfect"], 1, "Interaction = effect depends on other factor's level."),
+      q("q4", "Randomization in experimental design:", ["Increases bias", "Minimizes systematic bias by randomly assigning treatments", "Reduces sample size", "Is only for clinical trials"], 1, "Randomization minimizes systematic bias."),
+    ],
+    scenario: {
+      brand: "Manufacturing Process Optimization",
+      brief: "A factory wants to optimize tensile strength of a polymer. 2 factors: Temperature (3 levels: 150°C, 170°C, 190°C) + Pressure (2 levels: 50 bar, 80 bar). Run a full factorial experiment.",
+      asks: ["Design the experiment + analyze with two-way ANOVA", "Identify the optimal factor combination"],
+    },
+    solutionPrompt: "Write a 400-550 word experimental design: factorial layout, ANOVA table interpretation, main + interaction effects, interaction plot description, and optimal settings.",
+    minWords: 400, maxWords: 550,
+  },
+  {
+    id: 6, short: "W6", title: "Time Series & Forecasting",
+    objective: "Build time series models + generate forecasts with confidence intervals.",
+    estimatedMinutes: 150,
+    task: "Build a time series forecast using ARIMA. Check stationarity (ADF test), identify p/d/q parameters, fit the model, and generate a 6-month forecast with 95% CIs.",
+    quiz: [
+      q("q1", "The ADF test checks:", ["Model accuracy", "Whether a time series is stationary", "Feature importance", "Correlation"], 1, "ADF: H0 = non-stationary. p < 0.05 → stationary."),
+      q("q2", "In ARIMA(p, d, q), 'd' represents:", ["The number of autoregressive terms", "The degree of differencing needed for stationarity", "The moving average window", "The forecast horizon"], 1, "d = differencing order for stationarity."),
+      q("q3", "Seasonal decomposition of time series separates:", ["Mean and variance", "Trend + seasonal + residual components", "Training and test data", "High and low values"], 1, "Decomposition: trend + seasonal + residual."),
+      q("q4", "The MAPE (Mean Absolute Percentage Error) measures:", ["Model complexity", "Forecast accuracy as a percentage of actual values", "Sample size", "Number of parameters"], 1, "MAPE = mean |(actual - forecast) / actual| × 100."),
+    ],
+    scenario: {
+      brand: "Revenue Forecast — 6 Months",
+      brief: "A SaaS company has 24 months of monthly revenue. Growth has been ~5%/month with a Q1 seasonal dip. They need a 6-month forecast for investor reporting.",
+      asks: ["Build the ARIMA forecast + 95% CIs", "Report key metrics: MAPE, forecast values, seasonal pattern"],
+    },
+    solutionPrompt: "Write a 400-550 word forecast report: stationarity test, ARIMA parameters, model fit metrics, 6-month forecast + CIs, seasonal pattern, and limitations.",
+    minWords: 400, maxWords: 550,
+  },
+  {
+    id: 7, short: "W7", title: "Actuarial & Risk Analysis",
+    objective: "Apply statistical methods to insurance + risk problems.",
+    estimatedMinutes: 150,
+    task: "Build a simple actuarial model: calculate expected claim frequency, severity, and pure premium. Apply risk classification + credibility theory.",
+    quiz: [
+      q("q1", "The 'pure premium' in insurance is:", ["The marketing budget", "Expected claim frequency × expected claim severity", "Total revenue", "The number of policies"], 1, "Pure premium = E[frequency] × E[severity]."),
+      q("q2", "The Poisson distribution is commonly used for:", ["Claim severity", "Claim frequency (count of claims per period)", "Stock prices", "Customer satisfaction"], 1, "Poisson models claim frequency."),
+      q("q3", "A 'loss distribution' describes:", ["Marketing losses", "The probability distribution of claim amounts (severity)", "Employee attrition", "Office depreciation"], 1, "Loss distribution = claim amount distribution."),
+      q("q4", "Credibility theory in actuarial science is used to:", ["Test hypotheses", "Blend historical data with prior estimates based on data volume", "Calculate p-values", "Forecast stock prices"], 1, "Credibility theory blends historical data with priors."),
+    ],
+    scenario: {
+      brand: "Motor Insurance Pricing",
+      brief: "An insurer wants to price motor insurance for a new segment: 25-30 year old drivers in Mumbai. Historical data: 500 policies, 80 claims, average claim ₹45,000. Industry benchmark: 15% claim rate, ₹40,000 avg claim.",
+      asks: ["Calculate the pure premium + recommended price", "Assess the credibility of the historical data"],
+    },
+    solutionPrompt: "Write a 400-550 word actuarial analysis: frequency model, severity model, pure premium calculation, credibility assessment, and recommended premium.",
+    minWords: 400, maxWords: 550,
+  },
+  {
+    id: 8, short: "W8", title: "Capstone — Statistical Consulting Project",
+    objective: "Present a complete statistical analysis project from problem to recommendation.",
+    estimatedMinutes: 180,
+    task: "Compile a full statistical consulting project: define the business problem → data collection → analysis (descriptive + inferential + modeling) → recommendations. Present as a 10-slide deck.",
+    quiz: [
+      q("q1", "A statistical consulting project should:", ["Start with the analysis", "Start with understanding the business problem + decision to be made", "Skip data collection", "Only show p-values"], 1, "Start with the business problem + decision."),
+      q("q2", "The 'north-star' of a statistical analysis should be:", ["The p-value", "The business decision it enables + the cost of being wrong", "The sample size", "The R²"], 1, "North-star = business decision + cost of error."),
+      q("q3", "When presenting statistics to non-technical stakeholders:", ["Show all formulas", "Lead with the recommendation, then the evidence, then the methods", "Skip the conclusion", "Only show raw data"], 1, "Lead with recommendation → evidence → methods."),
+      q("q4", "The biggest risk in statistical consulting is:", ["Using the wrong software", "Answering the wrong question — solving a statistical problem that doesn't address the business need", "Too much data", "Too many meetings"], 1, "Biggest risk = solving the wrong problem."),
+    ],
+    scenario: {
+      brand: "Capstone — Your Consulting Project",
+      brief: "Choose a real business problem (e.g., pricing optimization, churn prediction, quality control, A/B test analysis). Design the full statistical consulting engagement. Present to the leadership team.",
+      asks: ["Present the full project as 10 slides", "End with the business recommendation + confidence level"],
+    },
+    solutionPrompt: "Write a 500-650 word capstone: problem statement, data + sampling plan, statistical methods used, key findings, business recommendation, confidence level, and limitations.",
+    minWords: 500, maxWords: 650,
+  },
+]
+
 // ─── Category → weeks mapping ───
 
 export function getWeeksForCategory(category: string, subcategory?: string): Week[] {
@@ -860,12 +1331,11 @@ export function getWeeksForCategory(category: string, subcategory?: string): Wee
   const sub = (subcategory || "").toLowerCase()
   if (cat.includes("mba") || cat.includes("management")) return WEEKS
   if (cat.includes("bba")) {
-    if (sub.includes("entrepreneur")) return BBA_ENTREPRENEUR_WEEKS
-    // BBA Digital Marketing, BBA HR, etc. — use entrepreneur for now
+    if (sub.includes("digital") || sub.includes("marketing")) return BBA_DIGITAL_WEEKS
     return BBA_ENTREPRENEUR_WEEKS
   }
   if (cat.includes("computer science") || cat.includes("data science")) return BSC_DS_WEEKS
-  if (cat.includes("biotech")) return BSC_DS_WEEKS // closest available
-  if (cat.includes("statistic")) return BSC_DS_WEEKS // closest available
+  if (cat.includes("biotech")) return BSC_BIOTECH_WEEKS
+  if (cat.includes("statistic") || cat.includes("maths")) return BSC_STATS_WEEKS
   return WEEKS // default to MBA Marketing
 }
