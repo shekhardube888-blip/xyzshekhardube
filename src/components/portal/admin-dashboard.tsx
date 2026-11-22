@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ApprovalQueuePanel } from "./approval-queue-panel"
+import { CertificatePanel } from "./certificate-panel"
 import {
   CheckCircle2,
   XCircle,
@@ -221,6 +222,9 @@ export function AdminDashboard() {
 
       {/* Approval queue — review student registrations, solutions, tests, certificates */}
       <ApprovalQueuePanel />
+
+      {/* Certificate panel — admin can print certificates for completed students */}
+      <CertificatePanel />
     </section>
   )
 }
