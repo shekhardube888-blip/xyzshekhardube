@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calendar, Clock, Radio, ArrowRight } from "lucide-react"
+import { useView } from "./use-view"
 
 export function Programs() {
   return (
@@ -116,10 +117,10 @@ function ProgramCard({ program }: { program: Program }) {
           {isSoon ? (
             <span>{program.cta}</span>
           ) : (
-            <a href="#login">
+            <button onClick={() => useView.getState().goToLogin()} className="flex items-center">
               {program.cta}
               <ArrowRight className="ml-1.5 h-4 w-4" />
-            </a>
+            </button>
           )}
         </Button>
         {!isSoon && (

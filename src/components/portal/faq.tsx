@@ -8,6 +8,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
+import { useView } from "./use-view"
 import { MessageCircle, HelpCircle } from "lucide-react"
 
 export function FAQ() {
@@ -60,12 +61,10 @@ export function FAQ() {
             </p>
             <Button
               className="mt-4 w-full bg-emerald-600 hover:bg-emerald-700"
-              asChild
+              onClick={() => useView.getState().goToLogin()}
             >
-              <a href="#login">
-                <MessageCircle className="mr-1.5 h-4 w-4" />
-                Open AI Mentor
-              </a>
+              <MessageCircle className="mr-1.5 h-4 w-4" />
+              Open AI Mentor
             </Button>
             <div className="mt-4 border-t pt-4 text-xs text-muted-foreground">
               <p>Prefer to talk to a human?</p>

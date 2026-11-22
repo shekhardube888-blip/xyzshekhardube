@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ChevronRight, ArrowLeft, Layers, BookOpen } from "lucide-react"
+import { useView } from "./use-view"
 
 const levelColor: Record<string, string> = {
   Beginner: "bg-emerald-100 text-emerald-700 border-emerald-200",
@@ -173,8 +174,8 @@ function SelectedCategory({
           <p className="text-sm text-muted-foreground">
             Like what you see? Register to enroll in the {category.title} track.
           </p>
-          <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
-            <a href="#login">Register for this track</a>
+          <Button onClick={() => useView.getState().goToLogin()} className="bg-emerald-600 hover:bg-emerald-700">
+            Register for this track
           </Button>
         </div>
       </CardContent>
