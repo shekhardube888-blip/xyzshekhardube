@@ -48,13 +48,9 @@ export function WeeklyTasksPanel() {
   const { mounted, getWeek, setAnswer, submitTest, submitSolution, completedWeeks } =
     useWeeklyProgress(QUESTIONS_PER_WEEK)
 
-  // Unlock rule: week N is unlocked if week N-1 has BOTH test passed AND
-  // solution submitted. Week 1 is always unlocked.
-  const isUnlocked = (weekId: number): boolean => {
-    if (weekId === 1) return true
-    const prev = getWeek(weekId - 1)
-    return prev.passed && prev.solution.submittedAt !== null
-  }
+  // All weeks are accessible from the start — no sequential unlocking.
+  // Certificate still requires all weeks completed (checked in CertificatePanel).
+  const isUnlocked = (_weekId: number): boolean => true
 
   const activeWeek = useMemo(
     () => WEEKS_FOR_CATEGORY.find((w) => w.id === activeWeekId) ?? WEEKS_FOR_CATEGORY[0],
@@ -114,9 +110,8 @@ export function WeeklyTasksPanel() {
               Start your weekly internship work
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Each week unlocks after you pass the previous week&apos;s test AND submit your
-              market scenario solution. Pass the test (≥ {PASS_THRESHOLD}/4 correct) and submit
-              a {WEEKS_FOR_CATEGORY[0].minWords}–{WEEKS_FOR_CATEGORY[WEEKS_FOR_CATEGORY.length - 1].maxWords} word solution to advance.
+              All 8 weekly tasks are accessible from the start — work on any week in any order.
+              Pass each test (≥ {PASS_THRESHOLD}/4 correct) and submit a {WEEKS_FOR_CATEGORY[0].minWords}–{WEEKS_FOR_CATEGORY[WEEKS_FOR_CATEGORY.length - 1].maxWords} word solution to mark each week complete.
             </p>
           </div>
           <Badge
@@ -137,35 +132,31 @@ export function WeeklyTasksPanel() {
           <Progress value={totalProgress} className="mt-1.5 h-2" />
         </div>
 
-        {/* Week selector */}
+        {/* Week selector — all weeks accessible from start */}
         <div className="mt-6 grid grid-cols-4 gap-2 sm:grid-cols-8">
           {WEEKS_FOR_CATEGORY.map((w) => {
-            const unlocked = mounted ? isUnlocked(w.id) : false
             const wp = mounted ? getWeek(w.id) : null
             const weekComplete = wp?.passed && wp.solution.submittedAt !== null
             return (
               <button
                 key={w.id}
-                disabled={!unlocked}
-                onClick={() => unlocked && setActiveWeekId(w.id)}
+                onClick={() => setActiveWeekId(w.id)}
                 className={`flex flex-col items-center gap-1 rounded-lg border p-3 text-center transition-all ${
                   activeWeekId === w.id
                     ? "border-emerald-500 bg-emerald-50 ring-1 ring-emerald-300"
-                    : unlocked
-                    ? "border-border bg-background hover:border-emerald-300 hover:bg-emerald-50/50"
-                    : "border-border bg-muted/40 opacity-60 cursor-not-allowed"
+                    : "border-border bg-background hover:border-emerald-300 hover:bg-emerald-50/50"
                 }`}
-                title={unlocked ? w.title : "Locked — complete the previous week first"}
+                title={w.title}
               >
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-700">
                   {w.short}
                 </span>
                 {weekComplete ? (
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                ) : !unlocked ? (
-                  <Lock className="h-3.5 w-3.5 text-muted-foreground" />
                 ) : wp?.passed ? (
                   <span className="text-[10px] font-medium text-amber-600">Test passed</span>
+                ) : wp?.solution.submittedAt ? (
+                  <span className="text-[10px] font-medium text-violet-600">Submitted</span>
                 ) : null}
                 <span className="mt-1 line-clamp-2 text-[10px] text-muted-foreground">
                   {w.title}
