@@ -163,7 +163,7 @@ export function Navbar() {
               </>
             ) : (
               <>
-                <Button variant="ghost" size="sm" onClick={goToLogin}>
+                <Button variant="ghost" size="sm" onClick={() => useView.getState().setView("login" as any)}>
                   Login
                 </Button>
                 <Button
@@ -324,13 +324,13 @@ export function Navbar() {
                 ) : (
                   <>
                     <SheetClose asChild>
-                      <Button variant="outline" onClick={goToLogin}>
+                      <Button variant="outline" onClick={() => useView.getState().setView("login" as any)}>
                         Login
                       </Button>
                     </SheetClose>
                     <SheetClose asChild>
                       <Button
-                        onClick={goToLogin}
+                        onClick={() => useView.getState().setView("register" as any)}
                         className="bg-emerald-600 hover:bg-emerald-700"
                       >
                         Register Free

@@ -18,6 +18,7 @@ import { AdminDashboard } from "@/components/portal/admin-dashboard"
 import { OrgManagementPanel } from "@/components/portal/org-management-panel"
 import { PendingApproval } from "@/components/portal/pending-approval"
 import { RegistrationDialog } from "@/components/portal/registration-dialog"
+import { LoginDialog } from "@/components/portal/login-dialog"
 import { useAuth } from "@/components/portal/auth-store"
 import { useView } from "@/components/portal/use-view"
 import { useMounted } from "@/components/portal/use-test-progress"
@@ -61,7 +62,13 @@ export default function Home() {
       <main className="flex-1">
         {view === "marketing" && <MarketingView />}
         {view === "marketing" && <RegistrationDialog />}
-        {view === "login" && <LoginView />}
+        {view === "marketing" && <LoginDialog />}
+        {view === "login" && (
+          <>
+            <MarketingView />
+            <LoginDialog forceOpen />
+          </>
+        )}
         {view === "register" && (
           <>
             <MarketingView />
