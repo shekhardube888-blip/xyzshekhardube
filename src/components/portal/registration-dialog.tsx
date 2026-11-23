@@ -48,7 +48,7 @@ export function RegistrationDialog({ forceOpen }: { forceOpen?: boolean }) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-lg p-0 sm:rounded-xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-md p-0 sm:rounded-xl max-h-[85vh] overflow-y-auto">
         <DialogHeader className="sr-only">
           <DialogTitle>Register for your internship</DialogTitle>
           <DialogDescription>
@@ -56,21 +56,22 @@ export function RegistrationDialog({ forceOpen }: { forceOpen?: boolean }) {
           </DialogDescription>
         </DialogHeader>
 
-        {/* Back button */}
-        <div className="sticky top-0 z-10 border-b bg-background/95 px-4 py-2 backdrop-blur">
+        {/* Compact header bar */}
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-emerald-600 px-4 py-2 text-white">
+          <span className="text-sm font-semibold">Register for Internship</span>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleClose(false)}
-            className="w-fit"
+            className="text-white hover:bg-white/20 h-7 px-2 text-xs"
           >
-            <ArrowLeft className="mr-1.5 h-4 w-4" />
-            Back to Home
+            <ArrowLeft className="mr-1 h-3.5 w-3.5" />
+            Close
           </Button>
         </div>
 
-        {/* Registration Wizard */}
-        <div className="p-4">
+        {/* Registration Wizard — compact */}
+        <div className="p-3">
           <RegistrationWizard />
         </div>
       </DialogContent>
