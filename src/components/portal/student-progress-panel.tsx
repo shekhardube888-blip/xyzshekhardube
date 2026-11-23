@@ -13,6 +13,9 @@ import {
 import {
   Users, TrendingUp, Award, Clock, Mail, Phone, GraduationCap, BarChart3, CheckCircle2, XCircle,
 } from "lucide-react"
+import { useApprovalStore } from "./approval-store"
+import { useEnrollmentStore } from "./enrollment-store"
+import { useMounted } from "./use-test-progress"
 
 // Demo student progress data — in production this would come from the database
 // keyed by email+phone (primary key)
@@ -115,11 +118,66 @@ const DEMO_STUDENTS: StudentProgress[] = [
 ]
 
 export function StudentProgressPanel() {
-  const totalStudents = DEMO_STUDENTS.length
-  const completedStudents = DEMO_STUDENTS.filter((s) => s.enrollmentStatus === "completed").length
-  const avgWeeks = Math.round(DEMO_STUDENTS.reduce((sum, s) => sum + (s.weeksCompleted / s.weeksTotal) * 100, 0) / totalStudents)
-  const avgTestScore = Math.round(DEMO_STUDENTS.reduce((sum, s) => sum + s.testAvgScore, 0) / totalStudents)
-  const certsIssued = DEMO_STUDENTS.filter((s) => s.certificateStatus === "issued").length
+  const mounted = useMounted()
+  const approvalRequests = useApprovalStore((s) => s.requests)
+  const enrollments = useEnrollmentStore((s) => s.enrollments)
+
+  // Merge demo students with real students from the stores
+  // Include ALL registrations (pending + approved) so admin sees everyone
+  const realStudents: StudentProgress[] = mounted
+    ? approvalRequests
+        .filter((r) => r.type === "registration")
+        .filter((r) => !DEMO_STUDENTS.some((d) => d.email.toLowerCase() === r.studentEmail.toLowerCase()))
+        .map((r) => {
+          const enr = enrollments.find(
+            (e) => e.studentEmail.toLowerCase() === r.studentEmail.toLowerCase(),
+          )
+          // Parse details from the approval request
+          const phoneMatch = r.detail.match(/Phone:\s*(\d+)/)
+          const qualMatch = r.detail.match(/Qualification:\s*([^,]+)/)
+          const yearMatch = r.detail.match(/Year:\s*([^,]+)/)
+          const collegeMatch = r.detail.match(/College:\s*([^,]+)/)
+          const cityMatch = r.detail.match(/City:\s*([^,]+)/)
+          const catMatch = r.detail.match(/Auto-enrolled in:\s*([^.]+)/)
+          const guardianMatch = r.detail.match(/Guardian \(([^)]+)\):\s*([^\s.]+)/)
+
+          const catParts = catMatch ? catMatch[1].split("→").map((s) => s.trim()) : ["MBA / Management", "Marketing & Brand Strategy"]
+
+          return {
+            id: r.id,
+            name: r.studentName,
+            email: r.studentEmail,
+            phone: phoneMatch ? phoneMatch[1] : "—",
+            stream: r.stream || "—",
+            qualification: qualMatch ? qualMatch[1].trim() : "—",
+            year: yearMatch ? yearMatch[1].trim() : "—",
+            college: collegeMatch ? collegeMatch[1].trim() : "—",
+            city: cityMatch ? cityMatch[1].trim() : "—",
+            category: catParts[0] || "MBA / Management",
+            subcategory: catParts[1] || "Marketing & Brand Strategy",
+            track: enr?.track || "MBA",
+            guardianEmail: guardianMatch ? guardianMatch[2] : "—",
+            guardianRole: guardianMatch ? guardianMatch[1] : "Parent",
+            startDate: enr?.startDate ?? Date.now(),
+            weeksCompleted: 0,
+            weeksTotal: 8,
+            testsPassed: 0,
+            testsTotal: 6,
+            testAvgScore: 0,
+            simGrade: "—",
+            simStatus: "not-started" as const,
+            certificateStatus: "pending" as const,
+            enrollmentStatus: "active" as const,
+          }
+        })
+    : []
+
+  const allStudents = [...DEMO_STUDENTS, ...realStudents]
+  const totalStudents = allStudents.length
+  const completedStudents = allStudents.filter((s) => s.enrollmentStatus === "completed").length
+  const avgWeeks = Math.round(allStudents.reduce((sum, s) => sum + (s.weeksCompleted / s.weeksTotal) * 100, 0) / totalStudents)
+  const avgTestScore = Math.round(allStudents.reduce((sum, s) => sum + s.testAvgScore, 0) / totalStudents)
+  const certsIssued = allStudents.filter((s) => s.certificateStatus === "issued").length
 
   return (
     <section className="border-t border-amber-200 bg-muted/20">
@@ -160,7 +218,7 @@ export function StudentProgressPanel() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {DEMO_STUDENTS.map((s) => {
+              {allStudents.map((s) => {
                 const pct = Math.round((s.weeksCompleted / s.weeksTotal) * 100)
                 return (
                   <div key={s.id} className="flex items-center gap-3">
@@ -199,7 +257,7 @@ export function StudentProgressPanel() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {DEMO_STUDENTS.map((s) => {
+                  {allStudents.map((s) => {
                     const weekPct = Math.round((s.weeksCompleted / s.weeksTotal) * 100)
                     return (
                       <TableRow key={s.id} className="cursor-pointer">
@@ -322,7 +380,7 @@ export function StudentProgressPanel() {
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
               <StatBlock label="Avg weekly completion" value={`${avgWeeks}%`} sub={`${completedStudents} fully complete`} />
               <StatBlock label="Avg test score" value={`${avgTestScore}%`} sub={`Across ${totalStudents} students`} />
-              <StatBlock label="Simulation grades" value={`${DEMO_STUDENTS.filter(s => s.simStatus === "completed").length}/${totalStudents}`} sub={`${DEMO_STUDENTS.filter(s => s.simGrade === "A").length} grade A`} />
+              <StatBlock label="Simulation grades" value={`${allStudents.filter(s => s.simStatus === "completed").length}/${totalStudents}`} sub={`${allStudents.filter(s => s.simGrade === "A").length} grade A`} />
               <StatBlock label="Certificates" value={`${certsIssued}/${totalStudents}`} sub="Issued / Total" />
             </div>
           </CardContent>
