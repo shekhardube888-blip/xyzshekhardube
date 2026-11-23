@@ -181,13 +181,13 @@ export function Navbar() {
 
             {/* Internship + other tabs — AFTER Login/Register */}
             {NAV_LINKS.filter((l) => l.href !== "#login").map((l) => (
-              <a
+              <button
                 key={l.href}
-                href={l.href}
+                onClick={() => useView.getState().setOpenSection(l.href.replace("#", "") as any)}
                 className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-muted"
               >
                 {l.label}
-              </a>
+              </button>
             ))}
           </nav>
         )}
@@ -268,12 +268,12 @@ export function Navbar() {
                 {showMarketingNav &&
                   NAV_LINKS.filter((l) => l.href !== "#login").map((l) => (
                     <SheetClose asChild key={l.href}>
-                      <a
-                        href={l.href}
-                        className="rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                      <button
+                        onClick={() => useView.getState().setOpenSection(l.href.replace("#", "") as any)}
+                        className="rounded-md px-3 py-2.5 text-left text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground w-full"
                       >
                         {l.label}
-                      </a>
+                      </button>
                     </SheetClose>
                   ))}
                 {showDashboardHeader && (

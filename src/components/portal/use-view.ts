@@ -4,9 +4,13 @@ import { create } from "zustand"
 
 export type View = "marketing" | "login" | "dashboard" | "register"
 
+export type SectionKey = "programs" | "categories" | "how" | "why" | "stories" | "about" | "faq" | null
+
 type ViewState = {
   view: View
+  openSection: SectionKey
   setView: (v: View) => void
+  setOpenSection: (s: SectionKey) => void
   /** Convenience: jump to login view */
   goToLogin: () => void
   /** Convenience: jump back to marketing landing */
@@ -28,8 +32,10 @@ type ViewState = {
  */
 export const useView = create<ViewState>((set) => ({
   view: "marketing",
+  openSection: null,
   setView: (v) => set({ view: v }),
+  setOpenSection: (s) => set({ openSection: s }),
   goToLogin: () => set({ view: "login" }),
-  goToMarketing: () => set({ view: "marketing" }),
-  goToDashboard: () => set({ view: "dashboard" }),
+  goToMarketing: () => set({ view: "marketing", openSection: null }),
+  goToDashboard: () => set({ view: "dashboard", openSection: null }),
 }))

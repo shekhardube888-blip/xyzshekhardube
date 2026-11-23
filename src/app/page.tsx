@@ -19,6 +19,7 @@ import { OrgManagementPanel } from "@/components/portal/org-management-panel"
 import { PendingApproval } from "@/components/portal/pending-approval"
 import { RegistrationDialog } from "@/components/portal/registration-dialog"
 import { LoginDialog } from "@/components/portal/login-dialog"
+import { SectionDialog } from "@/components/portal/section-dialog"
 import { useAuth } from "@/components/portal/auth-store"
 import { useView } from "@/components/portal/use-view"
 import { useMounted } from "@/components/portal/use-test-progress"
@@ -63,16 +64,19 @@ export default function Home() {
         {view === "marketing" && <MarketingView />}
         {view === "marketing" && <RegistrationDialog />}
         {view === "marketing" && <LoginDialog />}
+        {view === "marketing" && <SectionDialog />}
         {view === "login" && (
           <>
             <MarketingView />
             <LoginDialog forceOpen />
+            <SectionDialog />
           </>
         )}
         {view === "register" && (
           <>
             <MarketingView />
             <RegistrationDialog forceOpen />
+            <SectionDialog />
           </>
         )}
         {view === "dashboard" && <DashboardView />}
