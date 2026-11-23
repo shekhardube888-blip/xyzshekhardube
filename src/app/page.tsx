@@ -50,7 +50,7 @@ export default function Home() {
       }
       goToDashboard()
     } else if (view === "dashboard" && !role) {
-      goToMarketing()
+      goToLogin()
     }
   }, [mounted, view, role, registrationStatus, goToDashboard, goToMarketing])
 

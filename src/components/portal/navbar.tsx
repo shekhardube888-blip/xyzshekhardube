@@ -68,7 +68,7 @@ export function Navbar() {
       title: "Logged out",
       description: "Session cleared. Returning to the landing page.",
     })
-    goToMarketing()
+    goToLogin()
   }
 
   // What dashboard link to show in the navbar based on role
