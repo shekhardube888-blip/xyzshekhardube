@@ -66,9 +66,9 @@ export function Navbar() {
     }
     toast({
       title: "Logged out",
-      description: "Session cleared. Returning to the landing page.",
+      description: "Session cleared. Returning to the home page.",
     })
-    goToLogin()
+    goToMarketing()
   }
 
   // What dashboard link to show in the navbar based on role

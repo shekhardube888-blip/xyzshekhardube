@@ -170,8 +170,8 @@ export function Login() {
     if (wasGoogle) {
       signOut({ redirect: false }).catch(() => {})
     }
-    toast({ title: "Logged out", description: "Returning to the landing page." })
-    useView.getState().goToLogin()
+    toast({ title: "Logged out", description: "Returning to the home page." })
+    useView.getState().goToMarketing()
   }
 
   // ─── If Register Free is clicked, show the Registration Wizard ───

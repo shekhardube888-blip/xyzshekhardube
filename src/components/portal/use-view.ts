@@ -27,7 +27,7 @@ type ViewState = {
  * calls `goToMarketing()`. The user can always switch back via the navbar.
  */
 export const useView = create<ViewState>((set) => ({
-  view: "login",
+  view: "marketing",
   setView: (v) => set({ view: v }),
   goToLogin: () => set({ view: "login" }),
   goToMarketing: () => set({ view: "marketing" }),
