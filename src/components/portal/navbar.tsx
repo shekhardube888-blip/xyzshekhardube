@@ -168,7 +168,7 @@ export function Navbar() {
                 </Button>
                 <Button
                   size="sm"
-                  onClick={goToLogin}
+                  onClick={() => useView.getState().setView("register" as any)}
                   className="bg-emerald-600 hover:bg-emerald-700 mr-2"
                 >
                   Register Free

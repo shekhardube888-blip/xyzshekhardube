@@ -2,7 +2,7 @@
 
 import { create } from "zustand"
 
-export type View = "marketing" | "login" | "dashboard"
+export type View = "marketing" | "login" | "dashboard" | "register"
 
 type ViewState = {
   view: View
