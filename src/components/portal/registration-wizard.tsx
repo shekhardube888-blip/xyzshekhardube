@@ -78,7 +78,7 @@ export function RegistrationWizard() {
   const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(null)
   const createEnrollment = useEnrollmentStore((s) => s.createEnrollment)
 
-  const handleDetailsSubmit = () => {
+  const handleDetailsSubmit = async () => {
     if (!formName || !formEmail || !formPhone || !formStream || !formCollege || !formCity || !formQualification || !formYear) {
       toast({
         title: "Please fill all required fields",
@@ -136,9 +136,36 @@ export function RegistrationWizard() {
       autoSubcategory = "Operations & Supply Chain"
     }
 
-    // Create enrollment with auto-selected category
+    // Resolve category + track BEFORE DB save
     const cat = CATEGORIES.find((c) => c.title === autoCategory)
     const track = cat?.title.includes("MBA") ? "MBA" : cat?.title.includes("BBA") ? "BBA" : "BSc"
+
+    // Save student to DATABASE (email + phone as primary key)
+    try {
+      await fetch("/api/student/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formName,
+          email: formEmail,
+          phone: formPhone,
+          stream: formStream,
+          qualification: formQualification,
+          year: formYear,
+          college: formCollege,
+          city: formCity,
+          guardianEmail: formGuardianEmail || undefined,
+          guardianRole: formGuardianRole || undefined,
+          category: autoCategory,
+          subcategory: autoSubcategory,
+          track,
+        }),
+      })
+    } catch {
+      // Non-blocking — DB save is best-effort, localStorage still works
+    }
+
+    // Create enrollment with auto-selected category
     createEnrollment({
       studentEmail: formEmail,
       category: autoCategory,

@@ -88,33 +88,60 @@ export function LoginDialog({ forceOpen }: { forceOpen?: boolean }) {
   const [superPass, setSuperPass] = useState("")
   const [superError, setSuperError] = useState<string | null>(null)
 
-  const submitStudentSignIn = () => {
+  const submitStudentSignIn = async () => {
     if (!studentEmail || !studentPhone) {
       setStudentError("Please enter both email and phone number.")
       return
     }
-    const existing = findExistingStudent(studentEmail, studentPhone)
+
+    // Step 1: Check database for the student
+    let existing = null
+    try {
+      const res = await fetch("/api/student/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: studentEmail, phone: studentPhone }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.ok && data.student) {
+          existing = data.student
+        }
+      }
+    } catch {
+      // DB check failed — fall through to hardcoded list
+    }
+
+    // Step 2: Fall back to hardcoded existing students list
+    if (!existing) {
+      existing = findExistingStudent(studentEmail, studentPhone)
+    }
+
     if (existing) {
-      loginAsStudent(existing.name, existing.email, existing.stream)
+      // Found! Auto-login with full profile
+      loginAsStudent(existing.name, existing.email, existing.stream || "MBA · Marketing")
       useAuth.setState({
         phone: existing.phone,
-        qualification: existing.qualification,
-        year: existing.year,
-        college: existing.college,
-        city: existing.city,
-        guardianEmail: existing.guardianEmail,
-        guardianRole: existing.guardianRole,
+        qualification: existing.qualification || undefined,
+        year: existing.year || undefined,
+        college: existing.college || undefined,
+        city: existing.city || undefined,
+        guardianEmail: existing.guardianEmail || undefined,
+        guardianRole: existing.guardianRole || undefined,
       })
+
+      // Create enrollment if not already exists
       const enrollments = useEnrollmentStore.getState().getEnrollmentsForStudent(existing.email)
       if (enrollments.length === 0) {
         useEnrollmentStore.getState().createEnrollment({
           studentEmail: existing.email,
-          category: existing.category,
-          subcategory: existing.subcategory,
-          track: existing.track,
-          startDate: existing.startDate,
+          category: existing.category || "MBA / Management",
+          subcategory: existing.subcategory || "Marketing & Brand Strategy",
+          track: existing.track || "MBA",
+          startDate: existing.createdAt ? new Date(existing.createdAt).getTime() : Date.now(),
         })
       }
+
       setStudentError(null)
       toast({ title: `Welcome back, ${existing.name.split(" ")[0]}!`, description: "Opening your dashboard…" })
       setStudentEmail("")
@@ -122,7 +149,7 @@ export function LoginDialog({ forceOpen }: { forceOpen?: boolean }) {
       handleClose(false)
       goToDashboard()
     } else {
-      setStudentError("No existing student found. Click Register Free to create an account.")
+      setStudentError("No student found with this email + phone. Click Register Free to create an account.")
       toast({ title: "Student not found", description: "Register Free to create a new account.", variant: "destructive" })
     }
   }
