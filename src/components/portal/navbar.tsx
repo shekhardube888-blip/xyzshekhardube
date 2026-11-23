@@ -115,9 +115,71 @@ export function Navbar() {
           </span>
         </button>
 
-        {/* Desktop nav (marketing view only) */}
+        {/* Desktop toolbar — Login + Register FIRST, then internship + other tabs */}
         {showMarketingNav && (
           <nav className="hidden items-center gap-1 lg:flex">
+            {/* Login + Register Free — FIRST in the toolbar */}
+            {mounted && role ? (
+              <>
+                <Badge
+                  variant="outline"
+                  className={`gap-1 mr-2 ${
+                    role === "admin"
+                      ? "border-amber-300 bg-amber-50 text-amber-700"
+                      : role === "super_admin"
+                      ? "border-violet-300 bg-violet-50 text-violet-700"
+                      : role === "guest"
+                      ? "border-slate-300 bg-slate-50 text-slate-700"
+                      : "border-emerald-300 bg-emerald-50 text-emerald-700"
+                  }`}
+                >
+                  {role === "admin" ? (
+                    <ShieldCheck className="h-3 w-3" />
+                  ) : role === "super_admin" ? (
+                    <Crown className="h-3 w-3" />
+                  ) : (
+                    <UserRound className="h-3 w-3" />
+                  )}
+                  {name}
+                </Badge>
+                {role !== "guest" && (
+                  <button
+                    onClick={goToDashboard}
+                    className="flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50"
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    {dashboardLabel}
+                  </button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <LogOut className="mr-1.5 h-4 w-4" />
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" onClick={goToLogin}>
+                  Login
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={goToLogin}
+                  className="bg-emerald-600 hover:bg-emerald-700 mr-2"
+                >
+                  Register Free
+                </Button>
+              </>
+            )}
+
+            {/* Divider */}
+            <span className="mx-1 h-6 w-px bg-border" />
+
+            {/* Internship + other tabs — AFTER Login/Register */}
             {NAV_LINKS.filter((l) => l.href !== "#login").map((l) => (
               <a
                 key={l.href}
@@ -127,81 +189,11 @@ export function Navbar() {
                 {l.label}
               </a>
             ))}
-            {mounted && role && role !== "guest" && (
-              <button
-                onClick={goToDashboard}
-                className="flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50"
-              >
-                <LayoutDashboard className="h-4 w-4" />
-                {dashboardLabel}
-              </button>
-            )}
           </nav>
         )}
 
-        {/* Desktop actions */}
+        {/* Desktop actions — only shown when NOT on marketing view */}
         <div className="hidden items-center gap-2 lg:flex">
-          {showMarketingNav && (
-            <>
-              {mounted && role ? (
-                <>
-                  <Badge
-                    variant="outline"
-                    className={`gap-1 ${
-                      role === "admin"
-                        ? "border-amber-300 bg-amber-50 text-amber-700"
-                        : role === "super_admin"
-                        ? "border-violet-300 bg-violet-50 text-violet-700"
-                        : role === "guest"
-                        ? "border-slate-300 bg-slate-50 text-slate-700"
-                        : "border-emerald-300 bg-emerald-50 text-emerald-700"
-                    }`}
-                  >
-                    {role === "admin" ? (
-                      <ShieldCheck className="h-3 w-3" />
-                    ) : role === "super_admin" ? (
-                      <Crown className="h-3 w-3" />
-                    ) : (
-                      <UserRound className="h-3 w-3" />
-                    )}
-                    {name}
-                  </Badge>
-                  {role !== "guest" && (
-                    <button
-                      onClick={goToDashboard}
-                      className="rounded-md px-3 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50"
-                    >
-                      <LayoutDashboard className="mr-1.5 inline h-4 w-4" />
-                      {dashboardLabel}
-                    </button>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleLogout}
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    <LogOut className="mr-1.5 h-4 w-4" />
-                    Logout
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button variant="ghost" size="sm" onClick={goToLogin}>
-                    Login
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={goToLogin}
-                    className="bg-emerald-600 hover:bg-emerald-700"
-                  >
-                    Register Free
-                  </Button>
-                </>
-              )}
-            </>
-          )}
-
           {showLoginHeader && (
             <Button variant="ghost" size="sm" onClick={goToMarketing}>
               <ArrowLeft className="mr-1.5 h-4 w-4" />
