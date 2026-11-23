@@ -264,7 +264,42 @@ export function Navbar() {
                   AgilePortal Enterprise
                 </SheetTitle>
               </SheetHeader>
-              <div className="mt-4 flex flex-col gap-1 px-2">
+
+              {/* Login + Register FIRST (same order as desktop) */}
+              {showMarketingNav && (
+                <div className="mt-4 flex flex-col gap-2 px-2">
+                  {mounted && role ? (
+                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-center">
+                      <p className="text-xs text-muted-foreground">Signed in as</p>
+                      <p className="text-sm font-semibold text-foreground">{name}</p>
+                      <p className="mt-0.5 text-[10px] font-mono uppercase text-emerald-700">
+                        {ROLE_LABEL[role ?? "guest"]}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2">
+                      <SheetClose asChild>
+                        <Button variant="outline" size="sm" onClick={() => useView.getState().setView("login" as any)}>
+                          Login
+                        </Button>
+                      </SheetClose>
+                      <SheetClose asChild>
+                        <Button size="sm" onClick={() => useView.getState().setView("register" as any)} className="bg-emerald-600 hover:bg-emerald-700">
+                          Register Free
+                        </Button>
+                      </SheetClose>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Divider */}
+              {showMarketingNav && (
+                <div className="mx-2 my-2 h-px bg-border" />
+              )}
+
+              {/* Section links — AFTER Login/Register */}
+              <div className="flex flex-col gap-1 px-2">
                 {showMarketingNav &&
                   NAV_LINKS.filter((l) => l.href !== "#login").map((l) => (
                     <SheetClose asChild key={l.href}>
@@ -296,16 +331,11 @@ export function Navbar() {
                   </button>
                 </SheetClose>
               </div>
+
+              {/* Bottom: auth actions */}
               <div className="mt-auto flex flex-col gap-2 px-4 pb-6">
                 {mounted && role ? (
                   <>
-                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-center">
-                      <p className="text-xs text-muted-foreground">Signed in as</p>
-                      <p className="text-sm font-semibold text-foreground">{name}</p>
-                      <p className="mt-0.5 text-[10px] font-mono uppercase text-emerald-700">
-                        {ROLE_LABEL[role ?? "guest"]}
-                      </p>
-                    </div>
                     {showMarketingNav && role !== "guest" && (
                       <SheetClose asChild>
                         <Button variant="outline" onClick={goToDashboard}>
@@ -321,23 +351,7 @@ export function Navbar() {
                       </Button>
                     </SheetClose>
                   </>
-                ) : (
-                  <>
-                    <SheetClose asChild>
-                      <Button variant="outline" onClick={() => useView.getState().setView("login" as any)}>
-                        Login
-                      </Button>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <Button
-                        onClick={() => useView.getState().setView("register" as any)}
-                        className="bg-emerald-600 hover:bg-emerald-700"
-                      >
-                        Register Free
-                      </Button>
-                    </SheetClose>
-                  </>
-                )}
+                ) : null}
               </div>
             </SheetContent>
           </Sheet>
